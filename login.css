@@ -1,0 +1,196 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background: radial-gradient(circle at 10% 10%, #fbfff0, transparent 50%),
+        radial-gradient(circle at 90% 90%, #f4efff, transparent 50%),
+        #ffffff;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #000;
+}
+
+.login-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+
+.login-card {
+    background-color: #ffffff;
+    border-radius: 20px;
+    padding: 50px 40px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: all 0.3s;
+}
+
+.logo-container {
+    margin-bottom: 30px;
+    text-align: center;
+    width: 100%;
+}
+
+.logo-img {
+    max-width: 220px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+.subtitle {
+    font-size: 16px;
+    font-weight: 700;
+    color: #000000;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+#auth-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Form Layout */
+#auth-form.login-mode .form-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    max-width: 350px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+#auth-form.login-mode .register-only {
+    display: none;
+}
+
+#auth-form.registration-mode .form-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px 20px;
+    width: 100%;
+}
+
+/* Adjust subtitle visibility in registration mode */
+#auth-form.registration-mode~.subtitle,
+#auth-form.registration-mode .subtitle {
+    display: none;
+}
+
+/* In registration mode, we also need to hide the title that is a sibling above the form. 
+   Since we don't have a :has selector that's universally supported without prefix, 
+   we can just toggle a class on the card itself via JS, but `.login-mode` on form 
+   makes it hard to style siblings block. Wait, in CSS: */
+.login-card.registration-mode .subtitle {
+    display: none;
+}
+
+/* Inputs */
+.input-container {
+    position: relative;
+    width: 100%;
+}
+
+.outline-input {
+    width: 100%;
+    height: 48px;
+    border: 1px solid #dcdcdc;
+    border-radius: 8px;
+    padding: 0 15px;
+    font-size: 13px;
+    color: #333;
+    outline: none;
+    background: #ffffff;
+    transition: 0.2s;
+}
+
+.outline-input::placeholder {
+    color: #cccccc;
+    font-weight: 400;
+}
+
+.outline-input:focus {
+    border-color: #ffba27;
+}
+
+.floating-label {
+    position: absolute;
+    top: -10px;
+    left: 20px;
+    padding: 3px 14px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 800;
+    color: white;
+    z-index: 10;
+}
+
+.label-peach {
+    background: linear-gradient(90deg, #ff7e67, #ffa570);
+}
+
+.label-yellow {
+    background: linear-gradient(90deg, #ffcf1b, #ffb415);
+}
+
+/* Toggle Subtitle Text */
+.toggle-text-container {
+    margin-top: 35px;
+    margin-bottom: 25px;
+    font-size: 11px;
+    text-align: center;
+    color: #a0a0a0;
+}
+
+.toggle-text-container .bold-action {
+    color: #000000;
+    font-weight: 700;
+    cursor: pointer;
+    margin-left: 5px;
+    transition: 0.2s;
+}
+
+.toggle-text-container .bold-action:hover {
+    opacity: 0.7;
+}
+
+/* Submit row */
+.submit-row {
+    display: flex;
+    justify-content: center;
+}
+
+.btn-gradient {
+    background: linear-gradient(90deg, #ffcf1b, #ff8c5a);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    padding: 14px 40px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(255, 140, 90, 0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 140, 90, 0.4);
+}
+
+.btn-gradient:active {
+    transform: translateY(0);
+}
