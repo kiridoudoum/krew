@@ -153,8 +153,8 @@ const nodemailer = require('nodemailer');
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: 'krew.plus.mail@gmail.com',
-    pass: 'chld jwcs pzdi hvwm' // ⚠️ Mot de passe d'application requis
+    user: process.env.EMAIL_USER || 'krew.plus.mail@gmail.com',
+    pass: process.env.EMAIL_APP_PASSWORD // Use environment variable
   }
 });
 
@@ -190,7 +190,7 @@ const upload = multer({ dest: 'uploads/' });
 const Groq = require('groq-sdk');
 
 const groq = new Groq({
-  apiKey: "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"
+  apiKey: process.env.GROQ_API_KEY
 });
 
 app.post('/api/transcribe-audio', upload.single('audioFile'), async (req, res) => {
