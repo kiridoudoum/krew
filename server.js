@@ -11,8 +11,12 @@ app.use(cors());
 const USERS_FILE = path.join(__dirname, 'users.json');
 
 // Initialiser le fichier users.json s'il n'existe pas
-if (!fs.existsSync(USERS_FILE)) {
-  fs.writeFileSync(USERS_FILE, JSON.stringify([]));
+try {
+  if (!fs.existsSync(USERS_FILE)) {
+    fs.writeFileSync(USERS_FILE, JSON.stringify([]));
+  }
+} catch (e) {
+  console.log("Note: File writing disabled (read-only environment like Vercel).");
 }
 app.use(express.json({ limit: '50mb' })); // Augmenter la limite à 50mb pour recevoir des images en base64
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
