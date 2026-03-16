@@ -177,7 +177,20 @@ app.post('/api/transcribe-audio', upload.single('audioFile'), async (req, res) =
       model: "whisper-large-v3",
       language: "fr"
     });
-    res.json({ success: true, transcription: transcription.text });
+
+    const rawText = transcription.text;
+
+    // Étape 2 : Structuration et Mise en forme avec Claude
+    const formattedResponse = await anthropic.messages.create({
+      model: "claude-3-haiku-20240307",
+      max_tokens: 1500,
+      system: "Tu es un assistant expert en rédaction et structuration de comptes-rendus. Ton rôle est de transformer une transcription brute en un document structuré, élégant et facile à lire. Utilise des balises HTML simples : <h3> pour les titres, <p> pour les paragraphes, <strong> pour les mots clés importants, et <ul>/<li> pour les listes. Ne mets pas de balise <html> ou <body>, renvoie juste le contenu. Reste fidèle au contenu original mais rends-le très 'visuel' et organisé.",
+      messages: [{ role: 'user', content: `Structure et formate ce texte brut de façon professionnelle et visuelle : ${rawText}` }],
+    });
+
+    const structuredText = formattedResponse.content[0].text.trim();
+
+    res.json({ success: true, transcription: structuredText });
   } catch (error) {
     res.status(500).json({ error: error.message });
   } finally {

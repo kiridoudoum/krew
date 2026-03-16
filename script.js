@@ -780,10 +780,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
 
                 if (data.success) {
-                    // Cacher la partie Notion et stocker le texte pour plus tard si besoin
+                    // Afficher le résultat structuré (HTML)
                     const finalTextarea = document.getElementById('audio-final-text');
                     if (finalTextarea) {
-                        finalTextarea.value = data.transcription;
+                        finalTextarea.innerHTML = data.transcription;
                     }
                 } else {
                     alert("Erreur: " + (data.error || "Inconnue"));
@@ -821,7 +821,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnCopyAudio) {
         btnCopyAudio.addEventListener('click', () => {
             const docTitle = document.getElementById('audio-doc-title')?.value || '';
-            const docText = document.getElementById('audio-final-text')?.value || '';
+            const docText = document.getElementById('audio-final-text')?.innerText || ''; 
 
             const fullText = docTitle ? `${docTitle}\n\n${docText}` : docText;
 
