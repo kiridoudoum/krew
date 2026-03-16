@@ -328,4 +328,9 @@ app.put('/api/profile', (req, res) => {
   }
 });
 
-app.listen(3000, () => console.log("✅ Serveur pret sur le port 3000"));
+// Export for Vercel
+module.exports = app;
+
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(3000, () => console.log("✅ Serveur pret sur le port 3000"));
+}
