@@ -1003,19 +1003,6 @@ document.addEventListener('DOMContentLoaded', () => {
             btnSend.disabled = true;
 
             try {
-                const response = await fetch('/api/send-mail', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        targetEmail: targetEmail,
-                        replyToEmail: userEmail,
-                        subject: subjectText,
-                        body: bodyText
-                    })
-                });
-
-                const data = await response.json();
-
                 if (data.success) {
                     btnSend.innerText = "ENVOYÉ ! ✅";
                     setTimeout(() => {

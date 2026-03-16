@@ -105,6 +105,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const googleBtn = document.getElementById('google-login-btn');
     googleBtn.addEventListener('click', async () => {
         const provider = new firebase.auth.GoogleAuthProvider();
+        // Option 1: Demander l'autorisation d'envoyer des mails
+        provider.addScope('https://www.googleapis.com/auth/gmail.send');
         
         try {
             googleBtn.disabled = true;
@@ -112,6 +114,13 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const result = await auth.signInWithPopup(provider);
             const user = result.user;
+            const credential = result.credential;
+            const accessToken = credential.accessToken;
+
+            // Stocker le token pour l'envoi de mails si besoin
+            if (accessToken) {
+                localStorage.setItem('googleAccessToken', accessToken);
+            }
 
             // Vérifier/Créer le profil dans Firestore
             const userDoc = await db.collection('users').doc(user.email).get();

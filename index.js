@@ -128,6 +128,45 @@ app.post('/api/send-mail', async (req, res) => {
   }
 });
 
+// NOUVEAU : ENVOI VIA GMAIL OAUTH2 (TOKEN UTILISATEUR)
+app.post('/api/send-gmail-oauth', async (req, res) => {
+  const { accessToken, targetEmail, subject, body } = req.body;
+  
+  if (!accessToken) return res.status(401).json({ error: "Token manquant" });
+
+  try {
+    // Construire le mail au format RFC822
+    const str = [
+      "Content-Type: text/plain; charset=\"UTF-8\"\n",
+      "MIME-Version: 1.0\n",
+      "Content-Transfer-Encoding: 7bit\n",
+      "to: ", targetEmail, "\n",
+      "subject: ", subject, "\n\n",
+      body
+    ].join('');
+
+    // Encoder en Base64 URL-safe (requis par Gmail API)
+    const encodedMail = Buffer.from(str).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+
+    const response = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ raw: encodedMail })
+    });
+
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error?.message || "Erreur Gmail API");
+
+    res.json({ success: true, result });
+  } catch (error) {
+    console.error("Gmail OAuth Error:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 const upload = multer({ dest: '/tmp/' });
 app.post('/api/transcribe-audio', upload.single('audioFile'), async (req, res) => {
   if (groqApiKey === 'MISSING') return res.status(500).json({ error: "Missing Groq API Key" });
