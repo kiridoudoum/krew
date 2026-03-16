@@ -481,6 +481,30 @@
         const modalLogoutBtn = document.getElementById('modal-logout-btn');
         const avatarUploadInput = document.getElementById('profile-avatar-upload');
 
+        // --- SYNC FIREBASE ---
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                localStorage.setItem('isAuthenticated', 'true');
+                const userDoc = await db.collection('users').doc(user.email).get();
+                if (userDoc.exists) {
+                    const data = userDoc.data();
+                    const name = data.prenom || data.username || user.email.split('@')[0];
+                    localStorage.setItem('userName', name);
+                    localStorage.setItem('userEmail', user.email);
+                    
+                    document.getElementById('profile-email').value = user.email;
+                    document.getElementById('profile-username').value = name;
+                    
+                    if (data.avatar) {
+                        applyAvatar(data.avatar);
+                    }
+                }
+            } else {
+                localStorage.removeItem('isAuthenticated');
+                window.location.href = 'index.html';
+            }
+        });
+
         // Pré-remplir l'email
         const savedEmail = localStorage.getItem('userEmail') || 'invite@exemple.com';
         document.getElementById('profile-email').value = savedEmail;
