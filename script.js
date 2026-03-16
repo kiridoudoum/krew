@@ -1003,14 +1003,36 @@ document.addEventListener('DOMContentLoaded', () => {
             btnSend.disabled = true;
 
             try {
-                if (data.success) {
+                const accessToken = localStorage.getItem('googleAccessToken');
+                const endpoint = accessToken ? '/api/send-gmail-oauth' : '/api/send-mail';
+                const bodyData = { 
+                    targetEmail: targetEmail,
+                    subject: subjectText,
+                    body: bodyText
+                };
+                if (accessToken) bodyData.accessToken = accessToken;
+
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(bodyData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
                     btnSend.innerText = "ENVOYÉ ! ✅";
                     setTimeout(() => {
                         btnSend.innerText = originalBtnText;
                         btnSend.disabled = false;
                     }, 3000);
                 } else {
-                    alert("Erreur lors de l'envoi : " + (data.error || "Inconnue"));
+                    alert("Erreur lors de l'envoi : " + (data.error || "Inconnu"));
+                    // Si le token est expiré, le supprimer
+                    if (response.status === 401 && accessToken) {
+                        localStorage.removeItem('googleAccessToken');
+                        alert("Votre session Google a expiré. Veuillez vous reconnecter.");
+                    }
                     btnSend.innerText = originalBtnText;
                     btnSend.disabled = false;
                 }
