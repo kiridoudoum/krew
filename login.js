@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 // Rediriger vers la page principale
-                window.location.href = 'index.html';
+                window.location.href = 'app.html';
             } else {
                 alert(data.error || "Une erreur est survenue");
             }
