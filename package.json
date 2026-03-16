@@ -2,7 +2,6 @@
   "name": "mon-ia-perso",
   "version": "1.0.0",
   "description": "Mon IA Perso - Premium Assistant",
-  "main": "api/index.js",
   "engines": {
     "node": "18.x"
   },
@@ -14,5 +13,9 @@
     "groq-sdk": "^0.3.3",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.1"
+  },
+  "scripts": {
+    "start": "node api/index.js",
+    "build": "echo 'No build needed'"
   }
 }
