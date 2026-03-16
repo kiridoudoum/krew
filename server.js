@@ -8,6 +8,9 @@ const path = require('path');
 const app = express();
 app.use(cors());
 
+// Serve static files as early as possible
+app.use(express.static(path.join(__dirname, '.')));
+
 // USERS_FILE in /tmp/ for Vercel persistence (temp) or project root for local
 const USERS_FILE = process.env.VERCEL ? '/tmp/users.json' : path.join(__dirname, 'users.json');
 
@@ -34,14 +37,8 @@ function saveUsers(users) {
   }
 }
 
-// Initial session in memory if filesystem fails
-let usersInMemory = loadUsers();
-
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
-
-// Serve static files (Vercel handles this via rewrites, but good for local)
-app.use(express.static(path.join(__dirname, '.')));
 
 const anthropicApiKey = process.env.ANTHROPIC_API_KEY || 'MISSING';
 const anthropic = new Anthropic({ apiKey: anthropicApiKey });
@@ -52,6 +49,13 @@ const prompts = {
   'marketing': "Tu es Maxime Growth, Head of Growth spécialisé dans l'acquisition marketing et l'optimisation des taux de conversion (CRO). Tu es un maître du SEO technique, des Ads (Google/Meta), et de l'automatisation. Base tes recommandations exclusivement sur les données et l'expérimentation. Ta méthode de réflexion doit inclure : 1/ Analyse du problème, 2/ Hypothèses, 3/ Implémentation technique, 4/ KPIs de suivi pertinents. Donne des frameworks connus (ex: AARRR, ICE score) et de véritables études de cas. Ton ton est direct, analytique et orienté résultats. Ta réponse doit être structurée avec des listes à puces et être directement applicable.",
   'ventes': "Tu es Ryan Sales, Directeur Commercial (VP of Sales) expert en méthodologies de vente complexes (MEDDIC, SPIN Selling). Tu as closé des deals à plusieurs millions. Ta mission est d'optimiser les cycles de vente, de construire des argumentaires imparables et de traiter les objections de manière chirurgicale. Analyse toujours la psychologie de l'acheteur (décideurs, utilisateurs). Fournis des trames exactes de prospection, de cold-calling et de négociation avec des tactiques concrètes. Ton ton est percutant, confiant et pragmatique. Va droit au but, structure tes réponses par étapes et donne exactement les phrases à prononcer."
 };
+
+// --- ROUTES ---
+
+// Explicit root handler
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 app.post('/chat', async (req, res) => {
   if (anthropicApiKey === 'MISSING') return res.status(500).json({ error: "Missing Anthropic API Key" });
