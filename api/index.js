@@ -46,7 +46,6 @@ const prompts = {
 
 // --- ROUTES ---
 
-// Handle both root and /api prefixes for chat
 const chatHandler = async (req, res) => {
   if (anthropicApiKey === 'MISSING') return res.status(500).json({ error: "Missing Anthropic API Key" });
   try {
@@ -91,6 +90,13 @@ app.post('/api/login', (req, res) => {
 
 module.exports = app;
 
+// Local development support
 if (process.env.NODE_ENV !== 'production' && require.main === module) {
-  app.listen(3000, () => console.log("Local Server on 3000"));
+  // In local dev, we serve the public folder
+  app.use(express.static(path.join(__dirname, '../public')));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api/') || req.path === '/chat') return next();
+    res.sendFile(path.join(__dirname, '../public/index.html'));
+  });
+  app.listen(3000, () => console.log("Local Server on 3000 (serving /public)"));
 }
