@@ -100,4 +100,45 @@ document.addEventListener('DOMContentLoaded', () => {
             submitBtn.style.opacity = '1';
         }
     });
+
+    // CONNEXION GOOGLE
+    const googleBtn = document.getElementById('google-login-btn');
+    googleBtn.addEventListener('click', async () => {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        
+        try {
+            googleBtn.disabled = true;
+            googleBtn.style.opacity = '0.5';
+            
+            const result = await auth.signInWithPopup(provider);
+            const user = result.user;
+
+            // Vérifier/Créer le profil dans Firestore
+            const userDoc = await db.collection('users').doc(user.email).get();
+            if (!userDoc.exists) {
+                await db.collection('users').doc(user.email).set({
+                    nom: user.displayName.split(' ').slice(1).join(' ') || '',
+                    prenom: user.displayName.split(' ')[0] || '',
+                    email: user.email,
+                    avatar: user.photoURL,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+
+            localStorage.setItem('isAuthenticated', 'true');
+            localStorage.setItem('userEmail', user.email);
+            localStorage.setItem('userName', user.displayName || user.email.split('@')[0]);
+
+            window.location.href = 'app.html';
+
+        } catch (error) {
+            console.error(error);
+            if (error.code !== 'auth/popup-closed-by-user') {
+                alert("Erreur lors de la connexion Google : " + error.message);
+            }
+        } finally {
+            googleBtn.disabled = false;
+            googleBtn.style.opacity = '1';
+        }
+    });
 });

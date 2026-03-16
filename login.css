@@ -194,3 +194,55 @@ body {
 .btn-gradient:active {
     transform: translateY(0);
 }
+
+/* Google Login Button */
+.google-login-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    max-width: 350px;
+    margin: 20px auto 0;
+    padding: 12px;
+    background: #ffffff;
+    border: 1px solid #dcdcdc;
+    border-radius: 30px;
+    color: #3c4043;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.google-login-btn:hover {
+    background-color: #f8f9fa;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.google-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 350px;
+    margin: 25px auto 10px;
+    color: #a0a0a0;
+    font-size: 11px;
+}
+
+.divider::before,
+.divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #eeeeee;
+}
+
+.divider span {
+    padding: 0 15px;
+}
