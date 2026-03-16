@@ -54,46 +54,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!email || !password) return;
 
-        const endpoint = isLoginMode ? '/api/login' : '/api/register';
         submitBtn.disabled = true;
         submitBtn.style.opacity = '0.5';
 
         try {
-            const bodyData = { email, password };
-            if (!isLoginMode) {
-                bodyData.nom = nom;
-                bodyData.prenom = prenom;
-                bodyData.telephone = telephone;
-                bodyData.language = language;
-                bodyData.theme = 'dark'; // Add a default theme
-            }
-
-            const response = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(bodyData)
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                // Stocker 'isAuthenticated'
-                localStorage.setItem('isAuthenticated', 'true');
-                localStorage.setItem('userEmail', email);
-
-                if (data.user) {
-                    if (data.user.username) localStorage.setItem('userName', data.user.username);
-                    if (data.user.avatar) localStorage.setItem(`userAvatar_${data.user.email}`, data.user.avatar);
-                }
-
-                // Rediriger vers la page principale
-                window.location.href = 'app.html';
+            if (isLoginMode) {
+                // CONNEXION FIREBASE
+                await auth.signInWithEmailAndPassword(email, password);
             } else {
-                alert(data.error || "Une erreur est survenue");
+                // INSCRIPTION FIREBASE
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+
+                // SAUVEGARDE DU PROFIL DANS FIRESTORE
+                await db.collection('users').doc(user.email).set({
+                    nom,
+                    prenom,
+                    email,
+                    telephone,
+                    language,
+                    theme: 'dark',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
             }
+
+            // Stocker les infos de base localement pour compatibilité immédiate avec le script existant
+            localStorage.setItem('isAuthenticated', 'true');
+            localStorage.setItem('userEmail', email);
+            localStorage.setItem('userName', prenom || email.split('@')[0]);
+
+            // Rediriger vers l'application
+            window.location.href = 'app.html';
+
         } catch (error) {
             console.error(error);
-            alert("Erreur de connexion au serveur.");
+            let errorMsg = "Erreur d'authentification.";
+            if (error.code === 'auth/user-not-found') errorMsg = "Utilisateur non trouvé.";
+            if (error.code === 'auth/wrong-password') errorMsg = "Mot de passe incorrect.";
+            if (error.code === 'auth/email-already-in-use') errorMsg = "Cet email est déjà utilisé.";
+            if (error.code === 'auth/weak-password') errorMsg = "Le mot de passe est trop court.";
+            
+            alert(errorMsg);
         } finally {
             submitBtn.disabled = false;
             submitBtn.style.opacity = '1';

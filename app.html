@@ -16,6 +16,12 @@
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
 </head>
 
 <body>
@@ -565,42 +571,22 @@
             }
 
             try {
-                const response = await fetch('/api/profile', {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ currentEmail: savedEmail, updates })
-                });
+                const user = auth.currentUser;
+                if (!user) return alert("Non authentifié");
 
-                const data = await response.json();
-
-                if (response.ok) {
-                    // Mises à jour locales si succès
-                    if (field === 'email') {
-                        const oldEmail = savedEmail;
-                        localStorage.setItem('userEmail', updates.email);
-                        // Transférer l'avatar si l'email change
-                        const currentAvatar = localStorage.getItem(`userAvatar_${oldEmail}`);
-                        if (currentAvatar) {
-                            localStorage.setItem(`userAvatar_${updates.email}`, currentAvatar);
-                        }
-                        alert(`L'email a été sauvegardé. Veuillez recharger la page.`);
-                    } else if (field === 'username') {
-                        localStorage.setItem('userName', data.user.username);
-                        if (updates.avatar) {
-                            localStorage.setItem(`userAvatar_${savedEmail}`, data.user.avatar);
-                            applyAvatar(data.user.avatar);
-                            pendingAvatarBase64 = null;
-                        }
-                        alert(`Le profil a été mis à jour avec succès.`);
-                    } else if (field === 'password') {
-                        alert(`Le mot de passe a été modifié.`);
-                    }
-                } else {
-                    alert(data.error || "Une erreur est survenue lors de la sauvegarde.");
+                if (field === 'email') {
+                    await user.updateEmail(updates.email);
+                } else if (field === 'username') {
+                    await db.collection('users').doc(user.email).update(updates);
+                    localStorage.setItem('userName', updates.username);
+                } else if (field === 'password') {
+                    await user.updatePassword(updates.password);
                 }
+
+                alert("Sauvegarde réussie !");
             } catch (err) {
                 console.error(err);
-                alert("Erreur de connexion au serveur.");
+                alert("Erreur: " + err.message);
             } finally {
                 saveBtn.disabled = false;
                 saveBtn.style.opacity = '1';
@@ -609,8 +595,10 @@
 
         // Déconnexion
         modalLogoutBtn.addEventListener('click', () => {
-            localStorage.removeItem('isAuthenticated');
-            window.location.href = 'login.html';
+            auth.signOut().then(() => {
+                localStorage.removeItem('isAuthenticated');
+                window.location.href = 'index.html';
+            });
         });
     </script>
 </body>
