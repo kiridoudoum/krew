@@ -50,7 +50,14 @@ const prompts = {
   'ventes': "Tu es Ryan Sales, Directeur Commercial..."
 };
 
+// --- DIAGNOSTICS ---
+console.log("Server Starting...");
+console.log("Anthropic Key Present:", anthropicApiKey !== 'MISSING');
+console.log("Groq Key Present:", groqApiKey !== 'MISSING');
+console.log("Email User:", process.env.EMAIL_USER || 'Using default');
+
 // --- ROUTES ---
+app.get('/api/health', (req, res) => res.json({ status: 'ok', time: new Date().toISOString(), keys: { anthropic: anthropicApiKey !== 'MISSING', groq: groqApiKey !== 'MISSING' } }));
 
 const chatHandler = async (req, res) => {
   if (anthropicApiKey === 'MISSING') return res.status(500).json({ error: "Missing Anthropic API Key" });
@@ -149,6 +156,17 @@ app.post('/api/login', (req, res) => {
   let users = loadUsers();
   const user = users.find(u => u.email === email && u.password === password);
   res.json({ success: !!user, user });
+});
+
+app.put('/api/profile', (req, res) => {
+  const { currentEmail, updates } = req.body;
+  let users = loadUsers();
+  const index = users.findIndex(u => u.email === currentEmail);
+  if (index === -1) return res.status(404).json({ error: "User not found" });
+  
+  users[index] = { ...users[index], ...updates };
+  saveUsers(users);
+  res.json({ success: true, user: users[index] });
 });
 
 module.exports = app;

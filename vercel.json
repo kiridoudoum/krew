@@ -2,11 +2,12 @@
   "version": 2,
   "builds": [
     { "src": "index.js", "use": "@vercel/node" },
-    { "src": "{*.html,*.css,*.js,img/*}", "use": "@vercel/static" }
+    { "src": "!(index.js|package.json|package-lock.json|vercel.json|*.md|node_modules/**)", "use": "@vercel/static" }
   ],
   "routes": [
-    { "src": "/chat", "dest": "/index.js" },
-    { "src": "/api/(.*)", "dest": "/index.js" },
+    { "src": "/api/health", "dest": "index.js" },
+    { "src": "/api/(.*)", "dest": "index.js" },
+    { "src": "/chat", "dest": "index.js" },
     { "src": "/(.*)", "dest": "/$1" }
   ]
 }
