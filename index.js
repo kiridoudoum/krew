@@ -78,6 +78,10 @@ const chatHandler = async (req, res) => {
     });
     res.json({ reply: response.content[0].text });
   } catch (error) {
+    console.error("Anthropic Error:", error);
+    if (error.status === 401 || error.message?.includes('api-key')) {
+      return res.status(401).json({ error: "Clé API Anthropic invalide ou manquante. Veuillez vérifier vos variables d'environnement sur Vercel." });
+    }
     res.status(500).json({ error: error.message });
   }
 };
