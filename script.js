@@ -761,6 +761,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const audioFile = fileInput.files[0];
+            
+            // --- NOUVEAU : VERIFICATION TAILLE (LIMITE VERCEL 4.5MB) ---
+            const maxSize = 4 * 1024 * 1024; // 4MB pour être sûr
+            if (audioFile.size > maxSize) {
+                alert(`Fichier trop volumineux (${(audioFile.size / (1024 * 1024)).toFixed(2)} Mo). La limite est de 4 Mo. Essayez un fichier plus court ou compressé.`);
+                return;
+            }
+
             const formData = new FormData();
             formData.append('audioFile', audioFile);
 
@@ -776,6 +784,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     method: 'POST',
                     body: formData
                 });
+
+                if (response.status === 413) {
+                    throw new Error("Le fichier est trop lourd pour le serveur Vercel (Max 4.5 Mo).");
+                }
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText || `Erreur serveur (${response.status})`);
+                }
 
                 const data = await response.json();
 
@@ -808,7 +825,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } catch (error) {
                 console.error("Erreur d'envoi audio:", error);
-                alert("Impossible de joindre le serveur.");
+                alert("Erreur: " + error.message);
             } finally {
                 btnGoAudio.innerText = originalBtnText;
                 btnGoAudio.disabled = false;
