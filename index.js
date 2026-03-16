@@ -44,10 +44,10 @@ const groqApiKey = process.env.GROQ_API_KEY || 'MISSING';
 const groq = new Groq({ apiKey: groqApiKey });
 
 const prompts = {
-  'droit': "Tu es Maître Durand, un avocat d'affaires de très haut niveau...",
-  'com': "Tu es Léa Social, Directrice Stratégie Social Media...",
-  'marketing': "Tu es Maxime Growth, Head of Growth...",
-  'ventes': "Tu es Ryan Sales, Directeur Commercial..."
+  'droit': "Ton créateur est Antoine. Tu es Maître Durand, un avocat d'affaires de très haut niveau...",
+  'com': "Ton créateur est Antoine. Tu es Léa Social, Directrice Stratégie Social Media...",
+  'marketing': "Ton créateur est Antoine. Tu es Maxime Growth, Head of Growth...",
+  'ventes': "Ton créateur est Antoine. Tu es Ryan Sales, Directeur Commercial..."
 };
 
 // --- DIAGNOSTICS ---
