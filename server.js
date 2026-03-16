@@ -10,13 +10,13 @@ app.use(cors());
 
 const USERS_FILE = path.join(__dirname, 'users.json');
 
-// Initialiser le fichier users.json s'il n'existe pas
+// Initialiser le fichier users.json s'il n'existe pas (attention: lecture seule sur Vercel)
 try {
   if (!fs.existsSync(USERS_FILE)) {
     fs.writeFileSync(USERS_FILE, JSON.stringify([]));
   }
 } catch (e) {
-  console.log("Note: File writing disabled (read-only environment like Vercel).");
+  console.log("Note: File writing disabled in this environment (likely Vercel).");
 }
 app.use(express.json({ limit: '50mb' })); // Augmenter la limite à 50mb pour recevoir des images en base64
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
@@ -190,7 +190,7 @@ app.post('/api/send-mail', async (req, res) => {
 
 // --- ROUTE AUDIO TO TEXT (WHISPER) ---
 const multer = require('multer');
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({ dest: '/tmp/' }); // Vercel only allows writing to /tmp/
 const Groq = require('groq-sdk');
 
 const groq = new Groq({

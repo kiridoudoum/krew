@@ -1,618 +1,147 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
     <meta charset="UTF-8">
-    <title>Mon IA Perso - Marketing Dashboard</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-
-    <script>
-        // Si l'utilisateur n'est pas "connecté", le rediriger vers la landing page
-        if (localStorage.getItem('isAuthenticated') !== 'true') {
-            window.location.href = 'landing.html';
-        }
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L'intelligence réinventée — Mon IA Perso</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="landing.css">
 </head>
-
-<body>
-    <div class="app-container">
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="profile-section" style="cursor: pointer;" id="profile-avatar-btn" title="Ouvrir le profil">
-                    <div class="avatar" id="main-avatar-display">👦</div>
-                </div>
-                <button id="new-chat-btn" class="add-btn-purple">+</button>
+<body class="theme-white">
+    <header class="main-header">
+        <nav class="three-col-nav">
+            <div class="nav-left">
+                <img src="img/logo.png" alt="Mon IA Perso" class="header-logo-img">
             </div>
-
-            <div class="agents-grid">
-                <div class="agent-card bg-blue" onclick="setAgent('droit', this)">
-                    <div class="agent-emoji">👩🏻‍⚖️</div>
-                    <div class="agent-info">
-                        <span class="name">MAÎTRE</span>
-                        <span class="role">DURAND</span>
-                    </div>
-                </div>
-                <div class="agent-card bg-pink" onclick="setAgent('com', this)">
-                    <div class="agent-emoji">👔</div>
-                    <div class="agent-info">
-                        <span class="name">LÉA</span>
-                        <span class="role">SOCIAL</span>
-                    </div>
-                </div>
-                <div class="agent-card bg-green" onclick="setAgent('marketing', this)">
-                    <div class="agent-emoji">🚀</div>
-                    <div class="agent-info">
-                        <span class="name">MAXIME</span>
-                        <span class="role">GROWTH</span>
-                    </div>
-                </div>
-                <div class="agent-card bg-yellow" onclick="setAgent('ventes', this)">
-                    <div class="agent-emoji">💻</div>
-                    <div class="agent-info">
-                        <span class="name">RYAN</span>
-                        <span class="role">SALES</span>
-                    </div>
-                </div>
+            <div class="nav-center">
+                <a href="#hero">Produit</a>
+                <a href="#features">Solutions</a>
+                <a href="#features">Fonctions</a>
+                <a href="#features">Ressources</a>
             </div>
-
-            <div class="recents">
-                <h3>RÉCENTS</h3>
-                <div id="history-list" class="history-grid"></div>
+            <div class="nav-right">
+                <a href="login.html" class="nav-link-simple">Connexion</a>
+                <a href="login.html" class="nav-btn-pill-black">Essai gratuit</a>
             </div>
+        </nav>
+    </header>
 
-            <div class="sidebar-footer">
-                <button class="arrow-back-btn" id="toggle-sidebar-btn">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                        <polyline points="12 5 19 12 12 19"></polyline>
-                    </svg>
-                </button>
-            </div>
-        </aside>
-
-        <main class="chat-main">
-            <div class="top-logo">
-                <img id="main-krew-logo" src="img/logo.png" alt="krew+" class="main-logo" style="cursor: pointer;"
-                    title="Retour à l'accueil">
-            </div>
-
-            <div id="chat-messages"></div>
-
-            <div id="welcome-screen" class="welcome-screen">
-                <div class="welcome-titles">
-                    <h1 class="title-light" id="welcome-title-light">PRÊT</h1>
-                    <h2 class="title-bold" id="welcome-title-bold">A VOUS AIDER</h2>
+    <main class="page-wrapper">
+        <!-- Hero Section -->
+        <section id="hero" class="full-section hero-drealog">
+            <div class="center-content">
+                <div class="reveal-up integration-icons">
+                    <span class="icon-wrapper slack">💬</span>
+                    <span class="icon-wrapper notion">🗒️</span>
+                    <span class="icon-wrapper drive">📁</span>
+                    <span class="icon-wrapper gmail">📧</span>
+                    <span class="icon-wrapper calendar">🗓️</span>
                 </div>
-                <div class="welcome-suggestions" id="welcome-suggestions">
-                    <button class="suggestion-btn" onclick="showMailFactoryScreen()">REDIGER
-                        UN MAIL</button>
-                    <button class="suggestion-btn" onclick="showAudioToTextScreen()">METTRE
-                        UN AUDIO EN TEXTE</button>
-                    <button class="suggestion-btn"
-                        onclick="document.getElementById('user-input').value='J\'ai besoin d\'un conseil pour une tâche.'; document.getElementById('user-input').focus();">UN
-                        CONSEIL POUR UN TACHE</button>
+                <h1 class="reveal-up main-headline">
+                    Chatbot lives in a corner.<br>
+                    Dialog lives in the experience.
+                </h1>
+                <p class="reveal-up hero-subtitle-drealog">Transform your storefront with AI-powered conversations that guide shoppers, answer questions instantly, and turn browsing into buying.</p>
+                <div class="reveal-up cta-group-drealog">
+                    <a href="login.html" class="btn-black-pill">Book a demo</a>
+                    <a href="login.html" class="btn-white-pill">Create account</a>
                 </div>
             </div>
 
-            <div class="input-area" style="position: relative;">
-                <div class="image-preview-container" id="image-preview-container">
-                    <img id="image-preview-img" src="" alt="aperçu">
-                    <div class="preview-text-info" id="preview-text-name">NOM DE<br>L'IMAGE</div>
-                    <button id="image-preview-close" class="preview-close-btn">✕</button>
+            <!-- Balanced UI Visual Grid -->
+            <div class="hero-visual-drealog reveal-up">
+                <!-- Search Card (Left) -->
+                <div class="ui-card card-search-ai floating-card">
+                    <span class="search-label">Search products...</span>
+                    <span class="ask-ai-pill">✨ Ask AI</span>
                 </div>
 
-                <div class="input-wrapper">
-                    <div class="attachment-menu-container">
-                        <button class="action-circle-yellow" id="attachment-btn"
-                            style="font-size: 20px; font-weight: bold;">+</button>
-                        <div class="attachment-menu" id="attachment-menu">
-                            <button class="attachment-option" id="btn-import-image">
-                                <div class="attachment-icon">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                        <polyline points="7 10 12 15 17 10"></polyline>
-                                        <line x1="12" y1="15" x2="12" y2="3"></line>
-                                    </svg>
-                                </div>
-                                <span class="attachment-text">IMPORTER UNE IMAGE</span>
-                            </button>
-                            <button class="attachment-option" id="btn-import-file">
-                                <div class="attachment-icon">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-                                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-                                    </svg>
-                                </div>
-                                <span class="attachment-text">IMPORTER UN LIEN</span>
-                            </button>
-                        </div>
-
-                        <!-- Inputs invisibles pour la sélection de fichiers -->
-                        <input type="file" id="file-input-image" accept="image/*,video/*" style="display: none;">
-                        <input type="file" id="file-input-generic" style="display: none;">
-                    </div>
-                    <input type="text" id="user-input" placeholder="POSE TA QUESTION A ...">
-                    <button id="send-btn" class="action-circle-yellow">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="9 18 15 12 9 6"></polyline>
-                        </svg>
-                    </button>
-                </div>
-                <button class="action-circle-white mic-btn">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                        <line x1="12" y1="19" x2="12" y2="23"></line>
-                        <line x1="8" y1="23" x2="16" y2="23"></line>
-                    </svg>
-                </button>
-
-            </div>
-
-            <!-- AUDIO TO TEXT SCREEN (Hidden by default) -->
-            <div id="audio-to-text-screen" class="audio-screen" style="display: none;">
-                <div class="audio-header">
-                    <h1 class="audio-title">AUDIO TO TEXTE</h1>
-                    <button class="close-audio-btn" onclick="closeAudioToTextScreen()">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <line x1="15" y1="9" x2="9" y2="15"></line>
-                            <line x1="9" y1="9" x2="15" y2="15"></line>
-                        </svg>
-                    </button>
+                <!-- Suggestion Card (Left) -->
+                <div class="ui-card card-suggestion floating-card-alt">
+                    <div class="suggestion-header">✨ AI Response suggestion</div>
+                    <div class="suggestion-content">"Sure — I can recommend a few great options based on running style."</div>
                 </div>
 
-                <div class="audio-content" id="audio-main-content">
-                    <div class="audio-card upload-card">
-                        <h3 class="audio-card-title" id="audio-title-display">AJOUTER VOTRE FICHIER AUDIO<br><span
-                                class="audio-card-subtitle">(REUNION DISCUTION COUR ...)</span></h3>
-
-                        <input type="file" id="audio-file-input" accept="audio/*" style="display: none;">
-
-                        <div class="upload-circle-container" id="audio-upload-btn-container" style="cursor: pointer;">
-                            <div class="upload-circle" id="audio-upload-circle">
-                                <img src="img/plus.png" alt="+" class="plus-img" id="audio-plus-img">
-                            </div>
-                        </div>
-
-                        <button id="audio-go-btn" class="gradient-btn-go">GO</button>
-                    </div>
-
-                    <div class="audio-separator">
-                        <img src="img/point.png" alt="..." class="point-img">
-                    </div>
-
-                    <div class="audio-card result-card" id="audio-result-card">
-                        <p class="result-text-top">J'AI TERMINER VOTRE<br>CONTRENDU</p>
-
-                        <div class="result-text-main-container" id="audio-notion-container">
-                            <p class="result-text-main">Voulez-vous que je fasse<br>votre compte-rendu sur<br>Notion ?
-                            </p>
-                            <img src="img/Notion-logo.png" alt="Notion" class="notion-logo">
-                        </div>
-
-                        <div class="result-actions" id="audio-notion-actions">
-                            <button class="result-btn-outline" id="audio-btn-yes">OUI</button>
-                            <button class="result-btn-outline" id="audio-btn-no">NON</button>
+                <!-- Main Reply Card (Center) -->
+                <div class="ui-card card-reply floating-card">
+                    <div class="reply-header">
+                        <div class="reply-icon">✨</div>
+                        <div class="reply-text">
+                            <h4>"Can I return the product if it doesn't fit?"</h4>
+                            <p>Yes, unused items may be returned within 30 days for a full refund or exchange with proof of purchase.</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- NEW RESULT VIEW (Hidden by default, shown on "NON") -->
-                <div id="audio-result-view" class="audio-result-view" style="display: none;">
-                    <input type="text" id="audio-doc-title" class="audio-doc-title-input" placeholder="TITRE DU DOC">
-
-                    <div class="audio-content-container">
-                        <textarea id="audio-final-text" class="audio-content-textarea"
-                            placeholder="Contenue de l'audio"></textarea>
-                        <button id="audio-copy-btn" class="audio-copy-btn">COPIER</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- MAIL FACTORY SCREEN (Hidden by default) -->
-            <div id="mail-factory-screen" class="mail-screen" style="display: none;">
-                <div class="mail-header">
-                    <h1 class="mail-title">MAIL FACTORY</h1>
-                    <button class="close-audio-btn" onclick="closeMailFactoryScreen()">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <line x1="15" y1="9" x2="9" y2="15"></line>
-                            <line x1="9" y1="9" x2="15" y2="15"></line>
-                        </svg>
-                    </button>
+                <!-- Question Card (Center-Right) -->
+                <div class="ui-card card-question floating-card-alt">
+                    <div class="question-header">Customer Question</div>
+                    <div class="question-item">✨ "Can you help me find a gift for a runner?"</div>
+                    <div class="question-item">✨ Let me recommend options.</div>
+                    <div class="question-input-mock">Ask me anything... <span>→</span></div>
                 </div>
 
-                <div class="mail-content">
-                    <div class="mail-card left-mail-card">
-                        <label class="mail-label">A QUI VOUS ADRESSE VOUS ?</label>
-                        <div class="mail-pills">
-                            <button class="mail-pill active-pill">MON BOSSE</button>
-                            <button class="mail-pill">UN COLLÈGE</button>
-                            <button class="mail-pill">UN AMIE</button>
-                            <button class="mail-pill">LA FAMILLE</button>
-                            <button class="mail-pill">AUTRE</button>
+                <!-- Prompt Card (Right) -->
+                <div class="ui-card card-prompt floating-card">
+                    <div class="prompt-text">I am looking for new face</div>
+                </div>
+
+                <!-- Laptop Image Card (Right) -->
+                <div class="ui-card card-laptop-mockup floating-card-alt">
+                    <div class="laptop-content">
+                        <div class="laptop-img">
+                            <img src="img/laptop_user_mockup.png" alt="User on Laptop">
                         </div>
-
-                        <label class="mail-label">LE SUJET ?</label>
-                        <input type="text" id="mail-subject-input" class="mail-input"
-                            placeholder="LETTRE DE MOTIVATION POUR ALTERNANCE">
-
-                        <label class="mail-label">VOTRE TEXTE</label>
-                        <textarea id="mail-body-input" class="mail-textarea"
-                            placeholder="JE SUIS COMME CA JE VEUX FAIRE CA"></textarea>
-
-                        <button id="mail-go-btn" class="gradient-btn-go mail-go-btn">GO</button>
-                    </div>
-
-                    <div class="mail-separator">
-                        <img id="mail-plus-icon" src="img/plus.png" alt="+" class="mail-plus-img">
-                    </div>
-
-                    <div class="mail-card right-mail-card">
-                        <label class="mail-label">VOICI LE MAIL QUE J'AI ECRIT</label>
-                        <div id="mail-generated-title" class="mail-generated-title">LETTRE DE MOTIVATION POSTE DE
-                            GRAPHISTE</div>
-                        <textarea id="mail-generated-body" class="mail-generated-body"></textarea>
-
-                        <label class="mail-label small-label">EST CE QUE TU VEUX QUE JE L'ENVOIE POUR<br>GAGNÉ DU TEMPS
-                            ? SI OUI ENTRE LE MAIL</label>
-                        <input type="text" id="mail-target-email" class="mail-input small-input"
-                            placeholder="exemple@entreprise.com">
-
-                        <div class="mail-actions">
-                            <button id="mail-copy-btn" class="mail-btn-outline">COPIER</button>
-                            <button id="mail-send-btn" class="mail-btn-gradient">ENVOYER</button>
+                        <div class="laptop-overlay-text">
+                            <h4>Have a question about this product?</h4>
+                            <p>Ask AI before you buy.</p>
                         </div>
                     </div>
                 </div>
             </div>
+            <div class="scroll-indicator">↓</div>
+        </section>
 
-        </main>
-    </div>
-
-    <!-- Modale de profil avancée -->
-    <div id="profile-modal" class="modal-overlay">
-        <button class="close-profile-btn" id="close-profile-modal">✕</button>
-        <div class="profile-container light-theme-modal">
-
-            <div class="agents-header-container">
-                <div class="agents-section">
-                    <h3 class="section-title">FAVORI</h3>
-                    <div class="favorites-container">
-                        <div class="agent-slot favorite-slot" data-index="0" style="background: #92c5fd;">👩🏻‍⚖️</div>
-                        <div class="agent-slot favorite-slot" data-index="1" style="background: #fd8bca;">👔</div>
-                        <div class="agent-slot favorite-slot" data-index="2" style="background: #a7f3d0;">🚀</div>
-                        <div class="agent-slot favorite-slot" data-index="3" style="background: #fde047;">💻</div>
-                    </div>
-
-                    <div class="all-agents-container">
-                        <div class="add-agent-btn" id="open-create-agent-btn-new">
-                            <span>+</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="agents-text-box">
-                    <p>PERSONNALISEZ VOTRE EXPÉRIENCE AU MAXIMUM EN CRÉANT VOTRE PROPRE AGENT SELON VOTRE MÉTIER OU VOS
-                        BESOINS. LE BUT : UNE PERSONNALISATION TOTALE POUR DES PERFORMANCES OPTIMALES</p>
-                </div>
+        <!-- Story Section 1: Agents -->
+        <section id="features" class="full-section feature-story">
+            <div class="story-content">
+                <div class="emoji-visual-minimal reveal-scale">👔</div>
+                <h2 class="reveal-up">Une équipe à votre service.</h2>
+                <p class="reveal-up">Des agents spécialisés qui comprennent votre métier. Droit, Marketing, Ventes. Instantanément.</p>
             </div>
+        </section>
 
-            <!-- Carte Base de Connaissances (Entreprise) -->
-            <div class="profile-card light-card">
-                <div class="profile-card-left light-left">
-                    <h2><strong>BASE DE</strong><br><span class="title-light">DONNÉES</span></h2>
-                </div>
-                <div class="profile-card-right light-right">
-                    <p
-                        style="font-size: 10px; color: #888; text-transform: uppercase; margin-top: 0; margin-bottom: 15px; font-weight: 800;">
-                        Ces documents fourniront du contexte réel à tous vos agents.
-                    </p>
-                    <div id="knowledge-files-list"
-                        style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
-                        <!-- Les fichiers apparaîtront ici -->
-                    </div>
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <input type="file" id="knowledge-upload-input" accept=".txt,.csv,.json" style="display: none;">
-                        <button class="profile-save-btn light-btn" style="margin: 0;"
-                            onclick="document.getElementById('knowledge-upload-input').click()">
-                            + AJOUTER UN DOCUMENT
-                        </button>
-                    </div>
-                </div>
+        <!-- Story Section 2: Mail Factory -->
+        <section class="full-section feature-story grey-bg">
+            <div class="story-content">
+                <div class="emoji-visual-minimal reveal-scale">✉️</div>
+                <h2 class="reveal-up">L'art de bien écrire.</h2>
+                <p class="reveal-up">La Mail Factory transforme vos idées en communications impeccables. Gagnez du temps, gardez l'impact.</p>
             </div>
+        </section>
 
-            <!-- Carte Nom d'utilisateur -->
-            <div class="profile-card light-card">
-                <div class="profile-card-left light-left">
-                    <h2><strong>PERSONALISER</strong><br><span class="title-light">SON PROFIL</span></h2>
-                </div>
-                <div class="profile-card-right light-right">
-                    <div class="profile-input-group light-input">
-                        <label>NOM D'UTILISATEUR</label>
-                        <input type="text" id="profile-username" value="Utilisateur">
-                    </div>
-                    <div class="profile-avatar-row">
-                        <div class="profile-avatar-preview-wrapper"
-                            onclick="document.getElementById('profile-avatar-upload').click()">
-                            <img id="profile-avatar-preview" src="" alt="Avatar" style="display:none;">
-                            <div id="profile-avatar-placeholder" class="avatar-placeholder">👦</div>
-                            <input type="file" id="profile-avatar-upload" accept="image/*" style="display: none;">
-                        </div>
-                        <button class="upload-icon-btn dark-icon"
-                            onclick="document.getElementById('profile-avatar-upload').click()" title="Changer de photo">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                <polyline points="17 8 12 3 7 8"></polyline>
-                                <line x1="12" y1="3" x2="12" y2="15"></line>
-                            </svg>
-                        </button>
-                        <button class="profile-save-btn light-btn" style="margin-left: auto;"
-                            onclick="saveProfile('username')">SAUVEGARDER</button>
-                    </div>
-                </div>
+        <!-- Story Section 3: Audio -->
+        <section class="full-section feature-story">
+            <div class="story-content">
+                <div class="emoji-visual-minimal reveal-scale">🎙️</div>
+                <h2 class="reveal-up">Écoutez, nous écrivons.</h2>
+                <p class="reveal-up">Transformez vos audios en comptes-rendus structurés. Ne perdez plus une seule information de vos réunions.</p>
             </div>
+        </section>
 
-            <!-- Carte Email -->
-            <div class="profile-card light-card">
-                <div class="profile-card-left light-left">
-                    <h2><strong>EMAIL</strong></h2>
-                </div>
-                <div class="profile-card-right light-right">
-                    <div class="profile-input-group light-input">
-                        <label>EMAIL</label>
-                        <input type="email" id="profile-email" value="">
-                    </div>
-                    <button class="profile-save-btn light-btn" onclick="saveProfile('email')">SAUVEGARDER</button>
-                </div>
+        <!-- Final CTA -->
+        <section class="full-section final-call">
+            <div class="center-content">
+                <h1 class="reveal-up">Le futur commence ici.</h1>
+                <a href="login.html" class="btn-primary-white big-btn">Rejoindre Mon IA Perso</a>
             </div>
+        </section>
+    </main>
 
-            <!-- Carte Mot de Passe -->
-            <div class="profile-card light-card">
-                <div class="profile-card-left light-left">
-                    <h2><strong>MOT DE PASSE</strong></h2>
-                </div>
-                <div class="profile-card-right light-right">
-                    <div class="profile-input-group light-input">
-                        <label>MOT DE PASSE</label>
-                        <input type="password" id="profile-password" value="********">
-                    </div>
-                    <button class="profile-save-btn light-btn" onclick="saveProfile('password')">SAUVEGARDER</button>
-                </div>
-            </div>
+    <footer class="minimal-footer">
+        <p>© 2026 krew+. La simplicité est le luxe ultime.</p>
+    </footer>
 
-            <div class="profile-actions-light">
-                <button class="profile-action-btn text-danger" id="modal-logout-btn">Se déconnecter</button>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- Modale Création d'Agent IA -->
-    <div id="create-agent-modal" class="modal-overlay">
-        <button class="close-profile-btn" id="close-create-agent-modal">✕</button>
-        <div class="profile-container" style="max-height: 90vh; overflow-y: auto; width: 600px; max-width: 95%;">
-            <h2 style="text-align: center; margin-bottom: 20px; font-size: 16px; letter-spacing: 2px;">CRÉER UNE IA SUR
-                MESURE</h2>
-            <div id="wizard-container" class="wizard-container"
-                style="display: flex; align-items: center; justify-content: center; height: 100%; min-height: 400px; padding: 20px;">
-
-                <!-- CARTE CENTRALE -->
-                <div class="wizard-card"
-                    style="background-color: #1a1a1a; border-radius: 12px; width: 400px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; position: relative;">
-
-                    <!-- ETAPE 1 : IDENTITE -->
-                    <div id="wiz-step-identity"
-                        style="display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%; gap: 10px;">
-                        <div class="wizard-icon-box"
-                            style="background-color: #d1d1d1; width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
-                            <input type="text" id="wiz-emoji" value="🧠"
-                                style="font-size: 50px; background: transparent; border: none; text-align: center; width: 100%; height: 100%; cursor: pointer; outline: none; padding: 0;">
-                        </div>
-                        <input type="text" id="wiz-name" placeholder="NOM"
-                            style="font-size: 36px; font-weight: 700; color: white; background: transparent; border: none; text-align: center; width: 100%; outline: none; margin-bottom: 0px; text-transform: uppercase;">
-                        <input type="text" id="wiz-job" placeholder="MÉTIER"
-                            style="font-size: 16px; font-weight: 300; color: #dddddd; background: transparent; border: none; text-align: center; width: 100%; outline: none; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 30px;">
-
-                        <button id="wiz-start-btn"
-                            style="background: var(--accent-purple); color: white; border: none; padding: 12px 24px; border-radius: 20px; font-size: 14px; font-weight: 800; cursor: pointer; transition: 0.2s; width: 100%; text-transform: uppercase;">Suivant
-                            →</button>
-                    </div>
-
-                    <!-- ETAPE 2 à N : QUESTIONS (Caché au début) -->
-                    <div id="wiz-step-questions" style="display: none; flex-direction: column; width: 100%;">
-                        <!-- Rappel discret de l'IA ciblée -->
-                        <div id="wiz-current-identity"
-                            style="font-size: 10px; color: #888; text-transform: uppercase; text-align: center; margin-bottom: 20px; letter-spacing: 1px;">
-                        </div>
-
-                        <h3 id="wiz-question-title"
-                            style="font-size: 16px; font-weight: 600; color: #fff; text-align: center; margin-bottom: 25px;">
-                            LA QUESTION</h3>
-
-                        <div id="wiz-answers-container" style="display: flex; flex-direction: column; gap: 10px;">
-                            <!-- Pilules -->
-                        </div>
-
-                        <input type="text" id="wiz-custom-answer" placeholder="Votre réponse personnalisée..."
-                            style="display: none; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 12px 20px; border-radius: 20px; font-size: 12px; outline: none; margin-top: 10px; width: 100%; box-sizing: border-box;">
-
-                        <!-- Navigation -->
-                        <div style="display: flex; justify-content: space-between; margin-top: 30px;">
-                            <button id="wiz-prev-btn"
-                                style="background: transparent; color: #888; border: none; font-size: 12px; cursor: pointer; visibility: hidden; padding: 10px;">←
-                                Retour</button>
-                            <button id="wiz-next-btn"
-                                style="background: var(--accent-purple); color: white; border: none; padding: 10px 20px; border-radius: 15px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s;">Suivant
-                                →</button>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
-    <script>
-        // Gestion de la modale de profil
-        const profileBtn = document.getElementById('profile-avatar-btn');
-        const profileModal = document.getElementById('profile-modal');
-        const closeProfileBtn = document.getElementById('close-profile-modal');
-        const modalLogoutBtn = document.getElementById('modal-logout-btn');
-        const avatarUploadInput = document.getElementById('profile-avatar-upload');
-
-        // Pré-remplir l'email
-        const savedEmail = localStorage.getItem('userEmail') || 'invite@exemple.com';
-        document.getElementById('profile-email').value = savedEmail;
-
-        // Extraire un semblant de nom d'utilisateur depuis l'email (ou récupérer s'il existe)
-        const savedUsername = localStorage.getItem('userName') || savedEmail.split('@')[0];
-        document.getElementById('profile-username').value = savedUsername;
-
-        // Charger l'avatar
-        const savedAvatar = localStorage.getItem(`userAvatar_${savedEmail}`);
-        function applyAvatar(base64Data) {
-            if (base64Data) {
-                // Modale
-                document.getElementById('profile-avatar-preview').src = base64Data;
-                document.getElementById('profile-avatar-preview').style.display = 'block';
-                document.getElementById('profile-avatar-placeholder').style.display = 'none';
-
-                // Sidebar
-                document.getElementById('main-avatar-display').innerHTML = `<img src="${base64Data}" alt="Avatar">`;
-            }
-        }
-        if (savedAvatar) {
-            applyAvatar(savedAvatar);
-        }
-
-        // Changement de la photo de profil
-        let pendingAvatarBase64 = null;
-        if (avatarUploadInput) {
-            avatarUploadInput.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) {
-                    const file = e.target.files[0];
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                        pendingAvatarBase64 = event.target.result;
-                        // Prévisualiser temporairement dans la modale
-                        document.getElementById('profile-avatar-preview').src = pendingAvatarBase64;
-                        document.getElementById('profile-avatar-preview').style.display = 'block';
-                        document.getElementById('profile-avatar-placeholder').style.display = 'none';
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-        }
-
-        profileBtn.addEventListener('click', () => {
-            profileModal.classList.add('active');
-        });
-
-        // Fermer la modale via le bouton croix
-        closeProfileBtn.addEventListener('click', () => {
-            profileModal.classList.remove('active');
-            // Reset pending avatar if not saved
-            if (pendingAvatarBase64 && localStorage.getItem(`userAvatar_${savedEmail}`) !== pendingAvatarBase64) {
-                if (savedAvatar) {
-                    applyAvatar(savedAvatar);
-                } else {
-                    document.getElementById('profile-avatar-preview').style.display = 'none';
-                    document.getElementById('profile-avatar-placeholder').style.display = 'flex';
-                }
-                pendingAvatarBase64 = null;
-            }
-        });
-
-        // Fermer la modale en cliquant en dehors
-        profileModal.addEventListener('click', (e) => {
-            if (e.target === profileModal) {
-                closeProfileBtn.click();
-            }
-        });
-
-        // Actions de sauvegarde
-        async function saveProfile(field) {
-            const updates = {};
-            const saveBtn = event.target; // Capturer le bouton cliqué pour feedback visuel
-            saveBtn.disabled = true;
-            saveBtn.style.opacity = '0.5';
-
-            if (field === 'email') {
-                updates.email = document.getElementById('profile-email').value.trim();
-                if (!updates.email) return;
-            } else if (field === 'username') {
-                updates.username = document.getElementById('profile-username').value.trim();
-                if (pendingAvatarBase64) {
-                    updates.avatar = pendingAvatarBase64;
-                }
-            } else if (field === 'password') {
-                updates.password = document.getElementById('profile-password').value.trim();
-            }
-
-            try {
-                const response = await fetch('http://localhost:3000/api/profile', {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ currentEmail: savedEmail, updates })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    // Mises à jour locales si succès
-                    if (field === 'email') {
-                        const oldEmail = savedEmail;
-                        localStorage.setItem('userEmail', updates.email);
-                        // Transférer l'avatar si l'email change
-                        const currentAvatar = localStorage.getItem(`userAvatar_${oldEmail}`);
-                        if (currentAvatar) {
-                            localStorage.setItem(`userAvatar_${updates.email}`, currentAvatar);
-                        }
-                        alert(`L'email a été sauvegardé. Veuillez recharger la page.`);
-                    } else if (field === 'username') {
-                        localStorage.setItem('userName', data.user.username);
-                        if (updates.avatar) {
-                            localStorage.setItem(`userAvatar_${savedEmail}`, data.user.avatar);
-                            applyAvatar(data.user.avatar);
-                            pendingAvatarBase64 = null;
-                        }
-                        alert(`Le profil a été mis à jour avec succès.`);
-                    } else if (field === 'password') {
-                        alert(`Le mot de passe a été modifié.`);
-                    }
-                } else {
-                    alert(data.error || "Une erreur est survenue lors de la sauvegarde.");
-                }
-            } catch (err) {
-                console.error(err);
-                alert("Erreur de connexion au serveur.");
-            } finally {
-                saveBtn.disabled = false;
-                saveBtn.style.opacity = '1';
-            }
-        }
-
-        // Déconnexion
-        modalLogoutBtn.addEventListener('click', () => {
-            localStorage.removeItem('isAuthenticated');
-            window.location.href = 'login.html';
-        });
-    </script>
+    <script src="landing.js"></script>
 </body>
-
 </html>
