@@ -44,15 +44,14 @@ const groqApiKey = process.env.GROQ_API_KEY || 'MISSING';
 const groq = new Groq({ apiKey: groqApiKey });
 
 const prompts = {
-  'droit': "Tu es Maître Durand, un avocat d'affaires de très haut niveau...",
-  'com': "Tu es Léa Social, Directrice Stratégie Social Media...",
-  'marketing': "Tu es Maxime Growth, Head of Growth...",
-  'ventes': "Tu es Ryan Sales, Directeur Commercial..."
+  'droit': "Tu es Maître Durand...",
+  'com': "Tu es Léa Social...",
+  'marketing': "Tu es Maxime Growth...",
+  'ventes': "Tu es Ryan Sales..."
 };
 
 // --- ROUTES ---
 
-// 1. Chat API
 const chatHandler = async (req, res) => {
   if (anthropicApiKey === 'MISSING') return res.status(500).json({ error: "Missing Anthropic API Key" });
   try {
@@ -79,7 +78,6 @@ const chatHandler = async (req, res) => {
 app.post('/chat', chatHandler);
 app.post('/api/chat', chatHandler);
 
-// 2. Mail Factory
 app.post('/api/generate-mail', async (req, res) => {
   if (anthropicApiKey === 'MISSING') return res.status(500).json({ error: "Missing Anthropic API Key" });
   try {
@@ -119,11 +117,10 @@ app.post('/api/send-mail', async (req, res) => {
   }
 });
 
-// 3. Audio Transcription
 const upload = multer({ dest: '/tmp/' });
 app.post('/api/transcribe-audio', upload.single('audioFile'), async (req, res) => {
   if (groqApiKey === 'MISSING') return res.status(500).json({ error: "Missing Groq API Key" });
-  if (!req.file) return res.status(400).json({ error: "Aucun fichier audio reçu" });
+  if (!req.file) return res.status(400).json({ error: "No file" });
   try {
     const transcription = await groq.audio.transcriptions.create({
       file: fs.createReadStream(req.file.path),
@@ -138,11 +135,10 @@ app.post('/api/transcribe-audio', upload.single('audioFile'), async (req, res) =
   }
 });
 
-// 4. Auth
 app.post('/api/register', (req, res) => {
   const { email } = req.body;
   let users = loadUsers();
-  if (users.find(u => u.email === email)) return res.status(400).json({ error: "Email déjà utilisé" });
+  if (users.find(u => u.email === email)) return res.status(400).json({ error: "Email taken" });
   users.push(req.body);
   saveUsers(users);
   res.status(201).json({ success: true });
@@ -158,10 +154,10 @@ app.post('/api/login', (req, res) => {
 module.exports = app;
 
 if (process.env.NODE_ENV !== 'production' && require.main === module) {
-  app.use(express.static(path.join(__dirname, '..')));
+  app.use(express.static(path.join(__dirname, '../public')));
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api/') || req.path === '/chat') return next();
-    res.sendFile(path.join(__dirname, '../index.html'));
+    res.sendFile(path.join(__dirname, '../public/index.html'));
   });
-  app.listen(3000, () => console.log("Server Local on 3000"));
+  app.listen(3000, () => console.log("Local Server on 3000 (serving public)"));
 }
