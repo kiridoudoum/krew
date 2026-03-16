@@ -281,7 +281,7 @@ async function sendMessage() {
             };
         }
 
-        const response = await fetch('http://localhost:3000/chat', {
+        const response = await fetch('/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -772,7 +772,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (plusImg) plusImg.classList.add('rotating');
 
             try {
-                const response = await fetch('http://localhost:3000/api/transcribe-audio', {
+                const response = await fetch('/api/transcribe-audio', {
                     method: 'POST',
                     body: formData
                 });
@@ -929,7 +929,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (plusImg) plusImg.classList.add('rotating');
 
             try {
-                const response = await fetch('http://localhost:3000/api/generate-mail', {
+                const response = await fetch('/api/generate-mail', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ tone, subject, body })
@@ -1003,7 +1003,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btnSend.disabled = true;
 
             try {
-                const response = await fetch('http://localhost:3000/api/send-mail', {
+                const response = await fetch('/api/send-mail', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
