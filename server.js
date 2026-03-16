@@ -8,9 +8,6 @@ const path = require('path');
 const app = express();
 app.use(cors());
 
-// Serve static files as early as possible
-app.use(express.static(path.join(__dirname, '.')));
-
 // USERS_FILE in /tmp/ for Vercel persistence (temp) or project root for local
 const USERS_FILE = process.env.VERCEL ? '/tmp/users.json' : path.join(__dirname, 'users.json');
 
@@ -44,18 +41,14 @@ const anthropicApiKey = process.env.ANTHROPIC_API_KEY || 'MISSING';
 const anthropic = new Anthropic({ apiKey: anthropicApiKey });
 
 const prompts = {
-  'droit': "Tu es Maître Durand, un avocat d'affaires de très haut niveau, avec plus de 20 ans d'expérience au Barreau. Tu es un expert absolu en droit des sociétés, droit commercial et fiscalité. Ta mission est de fournir des analyses juridiques exhaustives, stratégiques et sans ambiguïté. Réfléchis toujours étape par étape (Chain of Thought) avant de donner ta conclusion. Cite systématiquement les articles de loi précis (Code Civil, Code de Commerce) et les jurisprudences récentes. Ton ton est institutionnel, factuel, et extrêmement rigoureux. Tu dois pointer les risques juridiques concrets et proposer des solutions d'atténuation. Formate tes réponses de manière aérée, avec des titres clairs.",
-  'com': "Tu es Léa Social, Directrice Stratégie Social Media et experte reconnue en communication digitale, marketing d'influence et viralité organique. Tu maîtrises parfaitement les algorithmes actuels de TikTok, Instagram, LinkedIn et X. Ta mission est de concevoir des concepts créatifs à fort ROI. Réfléchis toujours en termes d'entonnoir de conversion et de rétention d'audience. Utilise des hooks psychologiques puissants. Fournis des exemples de scripts, des propositions de hook, et des formats clairs. Ton ton est incisif, enthousiaste et avant-gardiste. Exclus tout jargon marketing dépassé et va toujours droit à l'essentiel avec une analyse des tendances (trend-jacking).",
-  'marketing': "Tu es Maxime Growth, Head of Growth spécialisé dans l'acquisition marketing et l'optimisation des taux de conversion (CRO). Tu es un maître du SEO technique, des Ads (Google/Meta), et de l'automatisation. Base tes recommandations exclusivement sur les données et l'expérimentation. Ta méthode de réflexion doit inclure : 1/ Analyse du problème, 2/ Hypothèses, 3/ Implémentation technique, 4/ KPIs de suivi pertinents. Donne des frameworks connus (ex: AARRR, ICE score) et de véritables études de cas. Ton ton est direct, analytique et orienté résultats. Ta réponse doit être structurée avec des listes à puces et être directement applicable.",
-  'ventes': "Tu es Ryan Sales, Directeur Commercial (VP of Sales) expert en méthodologies de vente complexes (MEDDIC, SPIN Selling). Tu as closé des deals à plusieurs millions. Ta mission est d'optimiser les cycles de vente, de construire des argumentaires imparables et de traiter les objections de manière chirurgicale. Analyse toujours la psychologie de l'acheteur (décideurs, utilisateurs). Fournis des trames exactes de prospection, de cold-calling et de négociation avec des tactiques concrètes. Ton ton est percutant, confiant et pragmatique. Va droit au but, structure tes réponses par étapes et donne exactement les phrases à prononcer."
+  'droit': "Tu es Maître Durand, un avocat d'affaires de très haut niveau...",
+  'com': "Tu es Léa Social, Directrice Stratégie Social Media...",
+  'marketing': "Tu es Maxime Growth, Head of Growth...",
+  'ventes': "Tu es Ryan Sales, Directeur Commercial..."
 };
 
-// --- ROUTES ---
-
-// Explicit root handler
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
+// --- API ROUTES ONLY ---
+// Vercel will handle static files (index.html, css, images) automatically.
 
 app.post('/chat', async (req, res) => {
   if (anthropicApiKey === 'MISSING') return res.status(500).json({ error: "Missing Anthropic API Key" });
@@ -94,59 +87,39 @@ app.post('/chat', async (req, res) => {
   }
 });
 
-// Mail generation
 app.post('/api/generate-mail', async (req, res) => {
   if (anthropicApiKey === 'MISSING') return res.status(500).json({ error: "Missing Anthropic API Key" });
   try {
     const { tone, subject, body } = req.body;
-    const systemPrompt = `Tu es un assistant expert en rédaction d'email...`;
     const response = await anthropic.messages.create({
       model: "claude-3-haiku-20240307",
       max_tokens: 1024,
-      system: systemPrompt,
+      system: `Assistant redacteur...`,
       messages: [{ role: 'user', content: 'Rédige l\'email s\'il te plaît.' }],
     });
     const fullText = response.content[0].text;
-    const regex = /OBJET:\s*(.+?)\n---\n([\s\S]+)/i;
-    const match = fullText.match(regex);
-    res.json({
-      success: true,
-      generatedSubject: match ? match[1].trim() : subject,
-      generatedBody: match ? match[2].trim() : fullText.trim()
-    });
+    res.json({ success: true, generatedSubject: subject, generatedBody: fullText.trim() });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// Nodemailer setup
 const nodemailer = require('nodemailer');
 const transporter = nodemailer.createTransport({
   service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER || 'krew.plus.mail@gmail.com',
-    pass: process.env.EMAIL_APP_PASSWORD
-  }
+  auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_APP_PASSWORD }
 });
 
 app.post('/api/send-mail', async (req, res) => {
   try {
-    const { targetEmail, replyToEmail, subject, body } = req.body;
-    const mailOptions = {
-      from: '"Mon IA Perso" <krew.plus.mail@gmail.com>',
-      to: targetEmail,
-      replyTo: replyToEmail || 'krew.plus.mail@gmail.com',
-      subject: subject,
-      text: body
-    };
-    await transporter.sendMail(mailOptions);
+    const { targetEmail, subject, body } = req.body;
+    await transporter.sendMail({ from: '"Mon IA Perso"', to: targetEmail, subject, text: body });
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// Audio Transcribe
 const multer = require('multer');
 const upload = multer({ dest: '/tmp/' });
 const Groq = require('groq-sdk');
@@ -168,9 +141,8 @@ app.post('/api/transcribe-audio', upload.single('audioFile'), async (req, res) =
   }
 });
 
-// Auth
 app.post('/api/register', (req, res) => {
-  const { email, password } = req.body;
+  const { email } = req.body;
   let users = loadUsers();
   if (users.find(u => u.email === email)) return res.status(400).json({ error: "Email taken" });
   users.push(req.body);
@@ -188,5 +160,7 @@ app.post('/api/login', (req, res) => {
 
 module.exports = app;
 if (process.env.NODE_ENV !== 'production') {
-  app.listen(3000, () => console.log("Server on 3000"));
+  app.use(express.static(path.join(__dirname, '.')));
+  app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+  app.listen(3000, () => console.log("Local Dev Server on 3000"));
 }
