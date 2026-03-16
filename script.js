@@ -780,10 +780,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
 
                 if (data.success) {
-                    // Afficher le résultat structuré (HTML)
-                    const finalTextarea = document.getElementById('audio-final-text');
-                    if (finalTextarea) {
-                        finalTextarea.innerHTML = data.transcription;
+                    const rawText = data.transcription;
+
+                    // Étape 2 : Demander le formatage structuré
+                    btnGoAudio.innerText = "✍️"; // Indiquer qu'on structure
+                    const formatResponse = await fetch('/api/format-transcription', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ rawText: rawText })
+                    });
+                    
+                    const formatData = await formatResponse.json();
+
+                    if (formatData.success) {
+                        const finalTextarea = document.getElementById('audio-final-text');
+                        if (finalTextarea) {
+                            finalTextarea.innerHTML = formatData.formattedText;
+                        }
+                    } else {
+                        // Fallback au texte brut si le formatage échoue
+                        const finalTextarea = document.getElementById('audio-final-text');
+                        if (finalTextarea) finalTextarea.innerText = rawText;
+                        console.error("Format Error:", formatData.error);
                     }
                 } else {
                     alert("Erreur: " + (data.error || "Inconnue"));

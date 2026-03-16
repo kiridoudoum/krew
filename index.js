@@ -178,9 +178,21 @@ app.post('/api/transcribe-audio', upload.single('audioFile'), async (req, res) =
       language: "fr"
     });
 
-    const rawText = transcription.text;
+    res.json({ success: true, transcription: transcription.text });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  } finally {
+    if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+  }
+});
 
-    // Étape 2 : Structuration et Mise en forme avec Claude
+// NOUVEAU : Structuration du texte après transcription
+app.post('/api/format-transcription', async (req, res) => {
+  if (anthropicApiKey === 'MISSING') return res.status(500).json({ error: "Missing Anthropic API Key" });
+  try {
+    const { rawText } = req.body;
+    if (!rawText) return res.status(400).json({ error: "Texte manquant" });
+
     const formattedResponse = await anthropic.messages.create({
       model: "claude-3-haiku-20240307",
       max_tokens: 1500,
@@ -188,13 +200,9 @@ app.post('/api/transcribe-audio', upload.single('audioFile'), async (req, res) =
       messages: [{ role: 'user', content: `Structure et formate ce texte brut de façon professionnelle et visuelle : ${rawText}` }],
     });
 
-    const structuredText = formattedResponse.content[0].text.trim();
-
-    res.json({ success: true, transcription: structuredText });
+    res.json({ success: true, formattedText: formattedResponse.content[0].text.trim() });
   } catch (error) {
     res.status(500).json({ error: error.message });
-  } finally {
-    if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
   }
 });
 
