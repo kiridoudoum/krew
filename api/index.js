@@ -12,11 +12,9 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// Serve static files (Crucial for CSS/JS/Images)
-app.use(express.static(path.join(__dirname, '.')));
-
 // --- USERS DATABASE (TEMP) ---
-const USERS_FILE = process.env.VERCEL ? '/tmp/users.json' : path.join(__dirname, 'users.json');
+// Vercel only allows writing to /tmp/
+const USERS_FILE = '/tmp/users.json';
 
 function loadUsers() {
   try {
@@ -47,15 +45,9 @@ const prompts = {
   'ventes': "Tu es Ryan Sales..."
 };
 
-// --- ROUTES ---
+// --- ROUTES (API ONLY) ---
 
-// 1. Root Route (Explicitly serve index.html)
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-// 2. Chat API
-app.post('/chat', async (req, res) => {
+app.post('/api/chat', async (req, res) => {
   if (anthropicApiKey === 'MISSING') return res.status(500).json({ error: "Missing Anthropic API Key" });
   try {
     const agentType = req.body.agent || 'droit';
@@ -63,8 +55,7 @@ app.post('/chat', async (req, res) => {
     let messages = [];
     if (req.body.messages && Array.isArray(req.body.messages)) {
       messages = req.body.messages.map(msg => {
-        let content = [{ type: "text", text: msg.text }];
-        return { role: msg.role === 'ai' ? 'assistant' : 'user', content: content };
+        return { role: msg.role === 'ai' ? 'assistant' : 'user', content: [{ type: "text", text: msg.text }] };
       });
     }
     const response = await anthropic.messages.create({
@@ -79,7 +70,6 @@ app.post('/chat', async (req, res) => {
   }
 });
 
-// 3. Register/Login
 app.post('/api/register', (req, res) => {
   const { email } = req.body;
   let users = loadUsers();
@@ -96,9 +86,10 @@ app.post('/api/login', (req, res) => {
   res.json({ success: !!user, user });
 });
 
-// --- EXPORT & LISTEN ---
+// For Vercel, we export the app
 module.exports = app;
 
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(3000, () => console.log("Server on 3000"));
+// For local development
+if (process.env.NODE_ENV !== 'production' && require.main === module) {
+  app.listen(3000, () => console.log("Local Server on 3000"));
 }
