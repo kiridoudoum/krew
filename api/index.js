@@ -13,7 +13,6 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // --- USERS DATABASE (TEMP) ---
-// Vercel only allows writing to /tmp/
 const USERS_FILE = '/tmp/users.json';
 
 function loadUsers() {
@@ -45,9 +44,10 @@ const prompts = {
   'ventes': "Tu es Ryan Sales..."
 };
 
-// --- ROUTES (API ONLY) ---
+// --- ROUTES ---
 
-app.post('/api/chat', async (req, res) => {
+// Handle both root and /api prefixes for chat
+const chatHandler = async (req, res) => {
   if (anthropicApiKey === 'MISSING') return res.status(500).json({ error: "Missing Anthropic API Key" });
   try {
     const agentType = req.body.agent || 'droit';
@@ -68,7 +68,10 @@ app.post('/api/chat', async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+};
+
+app.post('/chat', chatHandler);
+app.post('/api/chat', chatHandler);
 
 app.post('/api/register', (req, res) => {
   const { email } = req.body;
@@ -86,10 +89,8 @@ app.post('/api/login', (req, res) => {
   res.json({ success: !!user, user });
 });
 
-// For Vercel, we export the app
 module.exports = app;
 
-// For local development
 if (process.env.NODE_ENV !== 'production' && require.main === module) {
   app.listen(3000, () => console.log("Local Server on 3000"));
 }
