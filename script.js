@@ -998,27 +998,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const userEmail = localStorage.getItem('userEmail');
 
-            const originalBtnText = btnSend.innerText;
-            btnSend.innerText = "ENVOI EN COURS...";
-            btnSend.disabled = true;
-
-            try {
-                const accessToken = localStorage.getItem('googleAccessToken');
-                const endpoint = accessToken ? '/api/send-gmail-oauth' : '/api/send-mail';
+            // --- NOUVEAU : GESTION INCREMENTALE GMAIL ---
+            async function trySendMail(token) {
+                const endpoint = token ? '/api/send-gmail-oauth' : '/api/send-mail';
                 const bodyData = { 
                     targetEmail: targetEmail,
                     subject: subjectText,
                     body: bodyText
                 };
-                if (accessToken) bodyData.accessToken = accessToken;
+                if (token) bodyData.accessToken = token;
 
                 const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(bodyData)
                 });
-
-                const data = await response.json();
 
                 if (response.ok) {
                     btnSend.innerText = "ENVOYÉ ! ✅";
@@ -1027,15 +1021,48 @@ document.addEventListener('DOMContentLoaded', () => {
                         btnSend.disabled = false;
                     }, 3000);
                 } else {
-                    alert("Erreur lors de l'envoi : " + (data.error || "Inconnu"));
-                    // Si le token est expiré, le supprimer
-                    if (response.status === 401 && accessToken) {
+                    const errorData = await response.json();
+                    if (response.status === 401 && token) {
                         localStorage.removeItem('googleAccessToken');
-                        alert("Votre session Google a expiré. Veuillez vous reconnecter.");
+                        alert("Session expirée. Re-tentez l'envoi.");
+                    } else {
+                        alert("Erreur lors de l'envoi : " + (errorData.error || "Inconnu"));
                     }
                     btnSend.innerText = originalBtnText;
                     btnSend.disabled = false;
                 }
+            }
+
+            try {
+                let accessToken = localStorage.getItem('googleAccessToken');
+                const user = auth.currentUser;
+
+                // Si pas de token mais connecté avec Google -> Demander permission
+                if (!accessToken && user && user.providerData.some(p => p.providerId === 'google.com')) {
+                    const confirmAccess = confirm("Pour envoyer ce mail depuis votre adresse Gmail, une autorisation supplémentaire est nécessaire. Voulez-vous continuer ?");
+                    if (confirmAccess) {
+                        const provider = new firebase.auth.GoogleAuthProvider();
+                        provider.addScope('https://www.googleapis.com/auth/gmail.send');
+                        
+                        try {
+                            const result = await auth.currentUser.reauthenticateWithPopup(provider);
+                            accessToken = result.credential.accessToken;
+                            localStorage.setItem('googleAccessToken', accessToken);
+                        } catch (popupError) {
+                            console.error("Popup Error:", popupError);
+                            alert("L'autorisation a été annulée ou a échoué.");
+                            btnSend.innerText = originalBtnText;
+                            btnSend.disabled = false;
+                            return;
+                        }
+                    } else {
+                        // L'utilisateur refuse : on tente l'envoi classique via Krew assistant
+                        accessToken = null;
+                    }
+                }
+
+                await trySendMail(accessToken);
+
             } catch (error) {
                 console.error("Erreur d'envoi:", error);
                 alert("Impossible de joindre le serveur pour l'envoi.");

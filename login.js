@@ -105,8 +105,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const googleBtn = document.getElementById('google-login-btn');
     googleBtn.addEventListener('click', async () => {
         const provider = new firebase.auth.GoogleAuthProvider();
-        // Option 1: Demander l'autorisation d'envoyer des mails
-        provider.addScope('https://www.googleapis.com/auth/gmail.send');
         
         try {
             googleBtn.disabled = true;
