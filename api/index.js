@@ -92,11 +92,11 @@ module.exports = app;
 
 // Local development support
 if (process.env.NODE_ENV !== 'production' && require.main === module) {
-  // In local dev, we serve the public folder
-  app.use(express.static(path.join(__dirname, '../public')));
+  // In local dev, we serve the root folder
+  app.use(express.static(path.join(__dirname, '..')));
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api/') || req.path === '/chat') return next();
-    res.sendFile(path.join(__dirname, '../public/index.html'));
+    res.sendFile(path.join(__dirname, '../index.html'));
   });
-  app.listen(3000, () => console.log("Local Server on 3000 (serving /public)"));
+  app.listen(3000, () => console.log("Local Server on 3000 (serving root)"));
 }
