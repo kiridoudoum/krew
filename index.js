@@ -172,11 +172,18 @@ app.post('/api/transcribe-audio', upload.single('audioFile'), async (req, res) =
   if (groqApiKey === 'MISSING') return res.status(500).json({ error: "Missing Groq API Key" });
   if (!req.file) return res.status(400).json({ error: "No file" });
   try {
+    const ext = path.extname(req.file.originalname) || '.mp3';
+    const newPath = `${req.file.path}${ext}`;
+    fs.renameSync(req.file.path, newPath);
+
     const transcription = await groq.audio.transcriptions.create({
-      file: fs.createReadStream(req.file.path),
+      file: fs.createReadStream(newPath),
       model: "whisper-large-v3",
       language: "fr"
     });
+
+    // Nettoyer le fichier renommé
+    if (fs.existsSync(newPath)) fs.unlinkSync(newPath);
 
     res.json({ success: true, transcription: transcription.text });
   } catch (error) {
