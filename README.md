@@ -15,3 +15,4 @@ A high-fidelity recreaction of a premium SaaS landing page, featuring a centered
 
 ## Preview
 Open `landing.html` in your browser to view the page.
+ 
