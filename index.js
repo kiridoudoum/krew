@@ -8,6 +8,7 @@ const nodemailer = require('nodemailer');
 const multer = require('multer');
 const Groq = require('groq-sdk');
 const { Client } = require('@notionhq/client');
+const admin = require('firebase-admin');
 
 const app = express();
 app.use(cors());
@@ -47,6 +48,23 @@ const groq = new Groq({ apiKey: groqApiKey });
 const notionClientId = process.env.NOTION_CLIENT_ID || 'MISSING';
 const notionClientSecret = process.env.NOTION_CLIENT_SECRET || 'MISSING';
 const appUrl = process.env.APP_URL || 'http://localhost:3000';
+
+// initialization Firebase Admin
+const serviceAccountVar = process.env.FIREBASE_SERVICE_ACCOUNT;
+if (serviceAccountVar) {
+  try {
+    const serviceAccount = JSON.parse(serviceAccountVar);
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount)
+    });
+    console.log("Firebase Admin Initialized");
+  } catch (e) {
+    console.error("Firebase Admin Init Error:", e);
+  }
+} else {
+  console.log("FIREBASE_SERVICE_ACCOUNT variable missing");
+}
+const db = admin.apps.length > 0 ? admin.firestore() : null;
 
 const prompts = {
   'droit': "Ton créateur est Antoine. Tu es Maître Durand, un avocat d'affaires de très haut niveau...",
@@ -253,14 +271,25 @@ app.get('/api/notion/callback', async (req, res) => {
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "Erreur lors de l'échange du token");
 
-    let users = loadUsers();
-    let userIndex = users.findIndex(u => u.email === email);
-    if (userIndex !== -1) {
-      users[userIndex].notion_access_token = data.access_token;
-      saveUsers(users);
+    if (db) {
+      // SAUVEGARDE DANS FIRESTORE (Persistant sur Vercel)
+      await db.collection('users').doc(email).set({
+        notion_access_token: data.access_token
+      }, { merge: true });
+      
+      console.log(`Token Notion sauvegardé pour ${email}`);
       res.redirect('/app.html?notion=success');
     } else {
-      res.status(404).send("Utilisateur non trouvé.");
+      // Fallback local (peu fiable sur Vercel)
+      let users = loadUsers();
+      let userIndex = users.findIndex(u => u.email === email);
+      if (userIndex !== -1) {
+        users[userIndex].notion_access_token = data.access_token;
+        saveUsers(users);
+        res.redirect('/app.html?notion=success');
+      } else {
+        res.status(404).send("Utilisateur non trouvé dans le système local.");
+      }
     }
   } catch (err) {
     console.error("Notion OAuth Error:", err);
@@ -272,13 +301,26 @@ app.post('/api/notion-create', async (req, res) => {
   const { title, content, email } = req.body;
   if (!email) return res.status(400).json({ error: "Email utilisateur manquant" });
 
-  let users = loadUsers();
-  const user = users.find(u => u.email === email);
-  if (!user || !user.notion_access_token) {
-    return res.status(401).json({ error: "Veuillez d'abord connecter votre compte Notion dans votre profil." });
+  let notion_token = null;
+
+  if (db) {
+    // RÉCUPÉRATION DEPUIS FIRESTORE
+    const userDoc = await db.collection('users').doc(email).get();
+    if (userDoc.exists) {
+        notion_token = userDoc.data().notion_access_token;
+    }
+  } else {
+    // Fallback local
+    let users = loadUsers();
+    const user = users.find(u => u.email === email);
+    if (user) notion_token = user.notion_access_token;
   }
 
-  const userNotion = new Client({ auth: user.notion_access_token });
+  if (!notion_token) {
+    return res.status(401).json({ error: "Veuillez d'abord connecter votre compte Notion dans votre profil (ou verifiez que FIREBASE_SERVICE_ACCOUNT est configuré)." });
+  }
+
+  const userNotion = new Client({ auth: notion_token });
 
   try {
     if (!content) return res.status(400).json({ error: "Contenu manquant" });
