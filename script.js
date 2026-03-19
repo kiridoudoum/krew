@@ -890,11 +890,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Determine API root
                 const apiRoot = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
                                 ? 'http://localhost:3000' : '';
-                                
+                
+                const userEmail = localStorage.getItem('userEmail');
                 const response = await fetch(`${apiRoot}/api/notion-create`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ title: docTitle, content: docText })
+                    body: JSON.stringify({ title: docTitle, content: docText, email: userEmail })
                 });
 
                 const data = await response.json();
@@ -936,6 +937,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Erreur de copie:', err);
                 alert("Erreur lors de la copie");
             });
+        });
+    }
+
+    // 6. Clic sur CONNECTER NOTION (Profil)
+    const btnConnectNotion = document.getElementById('connect-notion-btn');
+    if (btnConnectNotion) {
+        btnConnectNotion.addEventListener('click', () => {
+            const userEmail = localStorage.getItem('userEmail');
+            if (!userEmail) return alert("Veuillez vous reconnecter pour pouvoir lier Notion.");
+            const apiRoot = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                            ? 'http://localhost:3000' : '';
+            window.location.href = `${apiRoot}/api/notion/auth?email=${encodeURIComponent(userEmail)}`;
         });
     }
 });

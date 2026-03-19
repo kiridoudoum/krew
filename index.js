@@ -44,9 +44,9 @@ const anthropic = new Anthropic({ apiKey: anthropicApiKey });
 const groqApiKey = process.env.GROQ_API_KEY || 'MISSING';
 const groq = new Groq({ apiKey: groqApiKey });
 
-const notionApiKey = process.env.NOTION_API_KEY || 'MISSING';
-const notionDatabaseId = process.env.NOTION_DATABASE_ID || 'MISSING';
-const notion = notionApiKey !== 'MISSING' ? new Client({ auth: notionApiKey }) : null;
+const notionClientId = process.env.NOTION_CLIENT_ID || 'MISSING';
+const notionClientSecret = process.env.NOTION_CLIENT_SECRET || 'MISSING';
+const appUrl = process.env.APP_URL || 'http://localhost:3000';
 
 const prompts = {
   'droit': "Ton créateur est Antoine. Tu es Maître Durand, un avocat d'affaires de très haut niveau...",
@@ -218,22 +218,96 @@ app.post('/api/format-transcription', async (req, res) => {
   }
 });
 
-app.post('/api/notion-create', async (req, res) => {
-  if (notionApiKey === 'MISSING' || !notion) {
-    return res.status(500).json({ error: "Clé API Notion manquante dans Vercel (.env). Veuillez l'ajouter." });
-  }
-  if (notionDatabaseId === 'MISSING') {
-    return res.status(500).json({ error: "ID de base de données Notion manquant dans Vercel (.env). Veuillez l'ajouter." });
-  }
+app.get('/api/notion/auth', (req, res) => {
+  const { email } = req.query;
+  if (!email) return res.status(400).send("Email requis pour associer le compte Notion.");
+  
+  const authUrl = `https://api.notion.com/v1/oauth/authorize?client_id=${notionClientId}&response_type=code&owner=user&redirect_uri=${encodeURIComponent(appUrl + '/api/notion/callback')}&state=${encodeURIComponent(email)}`;
+  res.redirect(authUrl);
+});
+
+app.get('/api/notion/callback', async (req, res) => {
+  const { code, state, error } = req.query;
+  if (error) return res.status(400).send(`Erreur lors de la connexion Notion: ${error}`);
+  if (!code || !state) return res.status(400).send("Paramètres manquants.");
+
+  const email = state;
+  const redirectUri = `${appUrl}/api/notion/callback`;
+  const encoded = Buffer.from(`${notionClientId}:${notionClientSecret}`).toString('base64');
 
   try {
-    const { title, content } = req.body;
+    const response = await fetch('https://api.notion.com/v1/oauth/token', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Basic ${encoded}`
+      },
+      body: JSON.stringify({
+        grant_type: 'authorization_code',
+        code: code,
+        redirect_uri: redirectUri
+      })
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Erreur lors de l'échange du token");
+
+    let users = loadUsers();
+    let userIndex = users.findIndex(u => u.email === email);
+    if (userIndex !== -1) {
+      users[userIndex].notion_access_token = data.access_token;
+      saveUsers(users);
+      res.redirect('/app.html?notion=success');
+    } else {
+      res.status(404).send("Utilisateur non trouvé.");
+    }
+  } catch (err) {
+    console.error("Notion OAuth Error:", err);
+    res.status(500).send(`Erreur : ${err.message}`);
+  }
+});
+
+app.post('/api/notion-create', async (req, res) => {
+  const { title, content, email } = req.body;
+  if (!email) return res.status(400).json({ error: "Email utilisateur manquant" });
+
+  let users = loadUsers();
+  const user = users.find(u => u.email === email);
+  if (!user || !user.notion_access_token) {
+    return res.status(401).json({ error: "Veuillez d'abord connecter votre compte Notion dans votre profil." });
+  }
+
+  const userNotion = new Client({ auth: user.notion_access_token });
+
+  try {
     if (!content) return res.status(400).json({ error: "Contenu manquant" });
 
-    // Ensure content is chunked if it's too long (> 2000 chars per block)
+    // Step 1: Find a database or page
+    let targetDbId = null;
+    let targetPageId = null;
+
+    const searchRes = await userNotion.search({
+      filter: { property: 'object', value: 'database' },
+      sort: { direction: 'descending', timestamp: 'last_edited_time' }
+    });
+
+    if (searchRes.results.length > 0) {
+      targetDbId = searchRes.results[0].id;
+    } else {
+      const pageRes = await userNotion.search({
+        filter: { property: 'object', value: 'page' },
+        sort: { direction: 'descending', timestamp: 'last_edited_time' }
+      });
+      if (pageRes.results.length > 0) {
+        targetPageId = pageRes.results[0].id;
+      } else {
+        return res.status(404).json({ error: "Aucune page ou base de données trouvée. Avez-vous partagé une page avec Krew+ sur Notion ?" });
+      }
+    }
+
     const blocks = [];
     const textChunks = content.match(/[\s\S]{1,2000}/g) || ["Contenu vide"];
-    
     for (const chunk of textChunks) {
         blocks.push({
             object: 'block',
@@ -244,25 +318,31 @@ app.post('/api/notion-create', async (req, res) => {
         });
     }
 
-    const response = await notion.pages.create({
-      parent: { database_id: notionDatabaseId },
-      properties: {
-        "Name": {
-          title: [
-            {
-              text: {
-                content: title || "Nouvelle transcription audio"
-              }
-            }
-          ]
+    let createPayload = { children: blocks };
+    
+    if (targetDbId) {
+      createPayload.parent = { database_id: targetDbId };
+      // Most DBs have a title property named 'title' theoretically, wait, it is a key mapping. Let's send basic structure.
+      // Notion creates pages in databases using properties where the key matching `title` type is expected
+      createPayload.properties = {
+        title: {
+          title: [{ text: { content: title || "Nouvelle transcription audio" } }]
         }
-      },
-      children: blocks
-    });
+      };
+    } else if (targetPageId) {
+      createPayload.parent = { page_id: targetPageId };
+      createPayload.properties = {
+        title: [{ text: { content: title || "Nouvelle transcription audio" } }]
+      };
+    }
 
+    const response = await userNotion.pages.create(createPayload);
     res.json({ success: true, url: response.url });
   } catch (error) {
-    console.error("Notion Error:", error);
+    console.error("Notion Create Error:", error);
+    if (error.code === 'validation_error' && targetDbId) {
+        return res.status(500).json({ error: "La structure de votre base de données ne correspond pas ou le champ titre par défaut a été renommé. Créez plutôt une page standard sur Notion et partagez-la avec l'application." });
+    }
     res.status(500).json({ error: error.message });
   }
 });
