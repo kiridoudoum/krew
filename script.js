@@ -929,12 +929,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     btnYes.innerText = "VOIR SUR NOTION";
                     btnYes.style.background = "#000000";
                     btnYes.style.color = "#ffffff";
-                    btnYes.onclick = () => window.open(data.url, '_blank');
                     
-                    // On ne ferme plus automatiquement tout de suite pour laisser le temps de cliquer
-                    setTimeout(() => {
-                        // On pourrait ajouter un bouton "Fermer" ou laisser comme ça
-                    }, 5000);
+                    // On change le comportement au clic
+                    btnYes.onclick = (e) => {
+                        e.stopPropagation();
+                        window.open(data.url, '_blank');
+                    };
+                    
+                    alert("C'est prêt ! Cliquez sur le bouton noir pour voir sur Notion.");
                 } else {
                     throw new Error(data.error || "Inconnue");
                 }
