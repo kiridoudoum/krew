@@ -722,6 +722,9 @@ function showAudioToTextScreen() {
         const resultCard = document.getElementById('audio-result-card');
         if (resultCard) resultCard.style.display = 'none';
 
+        const separator = document.getElementById('audio-separator');
+        if (separator) separator.style.display = 'none';
+
         const titleDisplay = document.getElementById('audio-title-display');
         if (titleDisplay) {
             titleDisplay.innerHTML = `AJOUTER VOTRE FICHIER AUDIO<br><span class="audio-card-subtitle">(REUNION DISCUTION COUR ...)</span>`;
@@ -847,6 +850,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     // --- NOUVEAU : Afficher le choix Notion seulement quand le texte est prêt ---
                     const resultCard = document.getElementById('audio-result-card');
                     if (resultCard) resultCard.style.display = 'flex';
+                    const separator = document.getElementById('audio-separator');
+                    if (separator) separator.style.display = 'flex';
                     const notionContainer = document.getElementById('audio-notion-container');
                     if (notionContainer) notionContainer.style.display = 'flex';
                     const notionActions = document.getElementById('audio-notion-actions');
