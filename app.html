@@ -65,6 +65,38 @@
                 </div>
             </div>
 
+            <!-- PHASE 2: TOOLS GRID (Hidden by default) -->
+            <div class="agents-grid tools-grid" id="tools-grid" style="display: none;">
+                <div class="agent-card bg-yellow active" id="tool-chat-card" onclick="activateTool('chat', this)">
+                    <div class="agent-emoji">💬</div>
+                    <div class="agent-info">
+                        <span class="name">CHAT</span>
+                        <span class="role">BOT</span>
+                    </div>
+                </div>
+                <div class="agent-card bg-blue" onclick="activateTool('audio', this)">
+                    <div class="agent-emoji">🎙️</div>
+                    <div class="agent-info">
+                        <span class="name">AUDIO</span>
+                        <span class="role">TEXTE</span>
+                    </div>
+                </div>
+                <div class="agent-card bg-pink" onclick="activateTool('mail', this)">
+                    <div class="agent-emoji">✉️</div>
+                    <div class="agent-info">
+                        <span class="name">MAIL</span>
+                        <span class="role">FACTORY</span>
+                    </div>
+                </div>
+                <div class="agent-card bg-green" onclick="activateTool('other', this)">
+                    <div class="agent-emoji">✨</div>
+                    <div class="agent-info">
+                        <span class="name">OUTIL</span>
+                        <span class="role">AUTRE</span>
+                    </div>
+                </div>
+            </div>
+
             <div class="recents">
                 <h3>RÉCENTS</h3>
                 <div id="history-list" class="history-grid"></div>

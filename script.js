@@ -16,9 +16,27 @@ function generateId() {
 function setAgent(agentType, element, customPrompt = null) {
     currentAgent = agentType;
     currentCustomPrompt = customPrompt;
-    document.querySelectorAll('.agent-card').forEach(card => card.classList.remove('active'));
+    
+    // Bascule de la sidebar entre la grille d'agents et la grille d'outils
+    const agentsGrid = document.querySelector('.agents-grid:not(.tools-grid)');
+    const toolsGrid = document.getElementById('tools-grid');
+    if (agentsGrid && toolsGrid) {
+        if (agentType) {
+            agentsGrid.style.display = 'none';
+            toolsGrid.style.display = 'grid';
+        } else {
+            agentsGrid.style.display = 'grid';
+            toolsGrid.style.display = 'none';
+        }
+    }
+
+    document.querySelectorAll('.agents-grid:not(.tools-grid) .agent-card').forEach(card => card.classList.remove('active'));
     if (element) {
         element.classList.add('active');
+    }
+    
+    if (agentType && document.getElementById('tool-chat-card')) {
+        activateTool('chat', document.getElementById('tool-chat-card'));
     }
 
     // Cacher l'écran audio si ouvert
@@ -1841,3 +1859,57 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// --- OUTILS SIDEBAR LOGIC ---
+function activateTool(toolName, element) {
+    // 1. Mettre à jour la classe "active" dans la grille d'outils
+    const toolCards = document.querySelectorAll('#tools-grid .agent-card');
+    toolCards.forEach(card => card.classList.remove('active'));
+    if (element) {
+        element.classList.add('active');
+    }
+
+    // 2. Cacher tous les écrans principaux
+    const chatMessages = document.getElementById('chat-messages');
+    const inputArea = document.querySelector('.input-area');
+    const audioScreen = document.getElementById('audio-to-text-screen');
+    const mailScreen = document.getElementById('mail-factory-screen');
+    const welcomeScreen = document.getElementById('welcome-screen');
+    
+    if (chatMessages) chatMessages.style.display = 'none';
+    if (inputArea) inputArea.style.display = 'none';
+    if (audioScreen) audioScreen.style.display = 'none';
+    if (mailScreen) mailScreen.style.display = 'none';
+    if (welcomeScreen) welcomeScreen.style.display = 'none';
+
+    // 3. Afficher l'écran correspondant
+    if (toolName === 'chat') {
+        if (chatMessages) {
+            chatMessages.style.display = 'flex';
+            // Supprimer d'éventuels messages "bientôt" si existants !
+            if (chatMessages.innerHTML.includes('Nouveaux outils bientôt')) {
+                // If history isn't re-rendered, we might just empty it for 'other', but let's just use loadSession rendering normally
+                // Since this might clear actual chat log if we just clear it. Actually, `chatMessages` stores real divs.
+                // Best to not blindly wipe it. Just remove the specific placeholder if found.
+                // It's handled by history load mostly anyway.
+            }
+        }
+        if (inputArea) inputArea.style.display = 'flex';
+    } else if (toolName === 'audio') {
+        if (typeof showAudioToTextScreen === 'function') {
+            showAudioToTextScreen(); 
+        } else if (audioScreen) {
+             audioScreen.style.display = 'flex';
+        }
+    } else if (toolName === 'mail') {
+        if (typeof showMailFactoryScreen === 'function') {
+            showMailFactoryScreen();
+        } else if (mailScreen) {
+            mailScreen.style.display = 'flex';
+        }
+    } else if (toolName === 'other') {
+        if (chatMessages) {
+            chatMessages.style.display = 'flex';
+        }
+    }
+}
