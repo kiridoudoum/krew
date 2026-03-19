@@ -301,6 +301,9 @@ app.post('/api/notion-create', async (req, res) => {
     const userDoc = await db.collection('users').doc(email).get();
     if (userDoc.exists) {
         notion_token = userDoc.data().notion_access_token;
+        console.log("Token Notion trouvé dans Firestore pour:", email);
+    } else {
+        console.log("Aucun document trouvé dans Firestore pour:", email);
     }
   } else {
     // Fallback local
@@ -332,11 +335,14 @@ app.post('/api/notion-create', async (req, res) => {
     } else {
       const pageRes = await userNotion.search({
         filter: { property: 'object', value: 'page' },
-        sort: { direction: 'descending', timestamp: 'last_edited_time' }
+        sort: { direction: 'descending', timestamp: 'last_edited_time' },
+        page_size: 1
       });
       if (pageRes.results.length > 0) {
         targetPageId = pageRes.results[0].id;
+        console.log("Page Notion cible trouvée:", targetPageId);
       } else {
+        console.log("Aucune page/DB partagée trouvée.");
         return res.status(404).json({ error: "Aucune page ou base de données trouvée. Avez-vous partagé une page avec Krew+ sur Notion ?" });
       }
     }

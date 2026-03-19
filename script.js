@@ -898,6 +898,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: JSON.stringify({ title: docTitle, content: docText, email: userEmail })
                 });
 
+                const contentType = response.headers.get("content-type");
+                if (!response.ok) {
+                    let errorMessage = "Erreur Serveur";
+                    if (contentType && contentType.includes("application/json")) {
+                        const errorData = await response.json();
+                        errorMessage = errorData.error || errorMessage;
+                    } else {
+                        errorMessage = await response.text();
+                    }
+                    throw new Error(errorMessage);
+                }
+
                 const data = await response.json();
                 if (data.success) {
                     btnYes.innerText = "CRÉÉ !";
@@ -905,13 +917,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (btnNo) btnNo.click(); // proceed to the result view
                     }, 1000);
                 } else {
-                    alert("Erreur Notion: " + (data.error || "Inconnue"));
-                    btnYes.innerText = originalText;
-                    btnYes.disabled = false;
+                    throw new Error(data.error || "Inconnue");
                 }
             } catch (error) {
                 console.error("Erreur Notion:", error);
-                alert("Erreur: " + error.message);
+                alert("Erreur Notion: " + error.message);
                 btnYes.innerText = originalText;
                 btnYes.disabled = false;
             }
