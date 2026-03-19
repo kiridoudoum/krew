@@ -926,10 +926,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const data = await response.json();
                 if (data.success) {
-                    btnYes.innerText = "CRÉÉ !";
+                    btnYes.innerText = "VOIR SUR NOTION";
+                    btnYes.style.background = "#000000";
+                    btnYes.style.color = "#ffffff";
+                    btnYes.onclick = () => window.open(data.url, '_blank');
+                    
+                    // On ne ferme plus automatiquement tout de suite pour laisser le temps de cliquer
                     setTimeout(() => {
-                        if (btnNo) btnNo.click(); // proceed to the result view
-                    }, 1000);
+                        // On pourrait ajouter un bouton "Fermer" ou laisser comme ça
+                    }, 5000);
                 } else {
                     throw new Error(data.error || "Inconnue");
                 }
