@@ -14,7 +14,7 @@ function generateId() {
 }
 
 function setAgent(agentType, element, customPrompt = null) {
-    currentAgent = agentType;
+    currentAgent = agentType === 'polyvalent' ? null : agentType;
     currentCustomPrompt = customPrompt;
     
     // Bascule de la sidebar entre la grille d'agents et la grille d'outils
@@ -60,6 +60,7 @@ function setAgent(agentType, element, customPrompt = null) {
     }
 
     const placeholders = {
+        'polyvalent': "POSE TA QUESTION À L'AGENT POLYVALENT...",
         'droit': "POSE TA QUESTION À MAÎTRE DURAND...",
         'com': "PARLE AVEC LÉA...",
         'marketing': "FAIT MOI L'INSIGHT...",
@@ -68,6 +69,7 @@ function setAgent(agentType, element, customPrompt = null) {
 
     // Nouveaux Titres Dynamiques
     const agentTitles = {
+        'polyvalent': { light: "AGENT", bold: "POLYVALENT" },
         'droit': { light: "MAITRE DURAND", bold: "EXPERT EN DROIT" },
         'com': { light: "LÉA", bold: "EXPERT SOCIAL" },
         'marketing': { light: "MAXIME", bold: "EXPERT GROWTH" },
@@ -1791,13 +1793,6 @@ function selectNasaAgent(type) {
     const screen = document.getElementById('new-agent-selection-screen');
     if (screen) screen.style.display = 'none';
     
-    // Polyvalent clears agent so it's global
-    if (type === 'polyvalent') {
-        setAgent(null);
-        document.getElementById('user-input').focus();
-        return;
-    }
-    
     // Select the corresponding card in the sidebar if exists
     let sidebarCard = null;
     const colorMap = {
@@ -1813,7 +1808,6 @@ function selectNasaAgent(type) {
     setAgent(type, sidebarCard);
     document.getElementById('user-input').focus();
 }
-
 // Sync Avatar and Handle Screen Display Logic
 document.addEventListener('DOMContentLoaded', () => {
     // If we're on a new login (no session), the screen is naturally visible.
