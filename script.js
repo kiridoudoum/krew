@@ -714,10 +714,13 @@ function showAudioToTextScreen() {
         if (resultView) resultView.style.display = 'none';
 
         const notionContainer = document.getElementById('audio-notion-container');
-        if (notionContainer) notionContainer.style.display = 'flex';
+        if (notionContainer) notionContainer.style.display = 'none';
 
         const notionActions = document.getElementById('audio-notion-actions');
-        if (notionActions) notionActions.style.display = 'flex';
+        if (notionActions) notionActions.style.display = 'none';
+
+        const resultCard = document.getElementById('audio-result-card');
+        if (resultCard) resultCard.style.display = 'none';
 
         const titleDisplay = document.getElementById('audio-title-display');
         if (titleDisplay) {
@@ -840,6 +843,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (finalTextarea) finalTextarea.innerText = rawText;
                         console.error("Format Error:", formatData.error);
                     }
+
+                    // --- NOUVEAU : Afficher le choix Notion seulement quand le texte est prêt ---
+                    const resultCard = document.getElementById('audio-result-card');
+                    if (resultCard) resultCard.style.display = 'flex';
+                    const notionContainer = document.getElementById('audio-notion-container');
+                    if (notionContainer) notionContainer.style.display = 'flex';
+                    const notionActions = document.getElementById('audio-notion-actions');
+                    if (notionActions) notionActions.style.display = 'flex';
+                    
+                    // Masquer le bouton GO car l'action est finie
+                    if (btnGoAudio) btnGoAudio.style.display = 'none';
                 } else {
                     alert("Erreur: " + (data.error || "Inconnue"));
                 }
