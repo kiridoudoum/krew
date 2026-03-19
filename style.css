@@ -1745,7 +1745,7 @@ body {
     transform: scale(1.05);
 }
 
-@media (max-width: 4000px) {
+@media (max-width: 1200px) {
     .mail-content {
         flex-direction: column;
         align-items: center;
