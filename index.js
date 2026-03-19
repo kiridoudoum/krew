@@ -7,6 +7,7 @@ const path = require('path');
 const nodemailer = require('nodemailer');
 const multer = require('multer');
 const Groq = require('groq-sdk');
+const { Client } = require('@notionhq/client');
 
 const app = express();
 app.use(cors());
@@ -42,6 +43,10 @@ const anthropic = new Anthropic({ apiKey: anthropicApiKey });
 
 const groqApiKey = process.env.GROQ_API_KEY || 'MISSING';
 const groq = new Groq({ apiKey: groqApiKey });
+
+const notionApiKey = process.env.NOTION_API_KEY || 'MISSING';
+const notionDatabaseId = process.env.NOTION_DATABASE_ID || 'MISSING';
+const notion = notionApiKey !== 'MISSING' ? new Client({ auth: notionApiKey }) : null;
 
 const prompts = {
   'droit': "Ton créateur est Antoine. Tu es Maître Durand, un avocat d'affaires de très haut niveau...",
@@ -209,6 +214,55 @@ app.post('/api/format-transcription', async (req, res) => {
 
     res.json({ success: true, formattedText: formattedResponse.content[0].text.trim() });
   } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/notion-create', async (req, res) => {
+  if (notionApiKey === 'MISSING' || !notion) {
+    return res.status(500).json({ error: "Clé API Notion manquante dans Vercel (.env). Veuillez l'ajouter." });
+  }
+  if (notionDatabaseId === 'MISSING') {
+    return res.status(500).json({ error: "ID de base de données Notion manquant dans Vercel (.env). Veuillez l'ajouter." });
+  }
+
+  try {
+    const { title, content } = req.body;
+    if (!content) return res.status(400).json({ error: "Contenu manquant" });
+
+    // Ensure content is chunked if it's too long (> 2000 chars per block)
+    const blocks = [];
+    const textChunks = content.match(/[\s\S]{1,2000}/g) || ["Contenu vide"];
+    
+    for (const chunk of textChunks) {
+        blocks.push({
+            object: 'block',
+            type: 'paragraph',
+            paragraph: {
+                rich_text: [{ type: 'text', text: { content: chunk } }]
+            }
+        });
+    }
+
+    const response = await notion.pages.create({
+      parent: { database_id: notionDatabaseId },
+      properties: {
+        "Name": {
+          title: [
+            {
+              text: {
+                content: title || "Nouvelle transcription audio"
+              }
+            }
+          ]
+        }
+      },
+      children: blocks
+    });
+
+    res.json({ success: true, url: response.url });
+  } catch (error) {
+    console.error("Notion Error:", error);
     res.status(500).json({ error: error.message });
   }
 });

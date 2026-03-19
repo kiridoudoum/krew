@@ -871,6 +871,52 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // 4.5 Clic sur OUI (On crée la page Notion puis on affiche l'interface)
+    if (btnYes) {
+        btnYes.addEventListener('click', async () => {
+            const docTitle = document.getElementById('audio-doc-title')?.value || 'Transcription Audio';
+            // Extract text from the HTML formatted output
+            const finalHtml = document.getElementById('audio-final-text')?.innerHTML || '';
+            // Basic html-to-text to avoid sending raw html tags to Notion blocks
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = finalHtml;
+            const docText = tempDiv.innerText || tempDiv.textContent || '';
+            
+            const originalText = btnYes.innerText;
+            btnYes.innerText = "⏳ EN COURS...";
+            btnYes.disabled = true;
+
+            try {
+                // Determine API root
+                const apiRoot = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                                ? 'http://localhost:3000' : '';
+                                
+                const response = await fetch(`${apiRoot}/api/notion-create`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: docTitle, content: docText })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    btnYes.innerText = "CRÉÉ !";
+                    setTimeout(() => {
+                        if (btnNo) btnNo.click(); // proceed to the result view
+                    }, 1000);
+                } else {
+                    alert("Erreur Notion: " + (data.error || "Inconnue"));
+                    btnYes.innerText = originalText;
+                    btnYes.disabled = false;
+                }
+            } catch (error) {
+                console.error("Erreur Notion:", error);
+                alert("Erreur: " + error.message);
+                btnYes.innerText = originalText;
+                btnYes.disabled = false;
+            }
+        });
+    }
+
     // 5. Clic sur COPIER (Audio)
     const btnCopyAudio = document.getElementById('audio-copy-btn');
     if (btnCopyAudio) {
