@@ -327,7 +327,8 @@ app.post('/api/notion-create', async (req, res) => {
 
     const searchRes = await userNotion.search({
       filter: { property: 'object', value: 'database' },
-      sort: { direction: 'descending', timestamp: 'last_edited_time' }
+      sort: { direction: 'descending', timestamp: 'last_edited_time' },
+      page_size: 1
     });
 
     if (searchRes.results.length > 0) {
@@ -363,10 +364,10 @@ app.post('/api/notion-create', async (req, res) => {
     
     if (targetDbId) {
       createPayload.parent = { database_id: targetDbId };
-      // Most DBs have a title property named 'title' theoretically, wait, it is a key mapping. Let's send basic structure.
-      // Notion creates pages in databases using properties where the key matching `title` type is expected
+      // On essaie d'être malin : dans Notion, le titre d'une base de données est souvent 'Name' ou 'title' ou 'Name' (fr)
+      // On va essayer d'envoyer 'title' mais si ça échoue le catch donnera un conseil à l'utilisateur.
       createPayload.properties = {
-        title: {
+        "title": {
           title: [{ text: { content: title || "Nouvelle transcription audio" } }]
         }
       };
