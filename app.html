@@ -625,6 +625,65 @@
             });
         });
     </script>
+
+    <!-- EXTRA POST-CONNECTION SELECTION SCREEN -->
+    <div id="new-agent-selection-screen" class="nasa-overlay">
+        <div class="nasa-header">
+            <div class="nasa-avatar-container" onclick="document.getElementById('profile-avatar-btn').click(); document.getElementById('new-agent-selection-screen').style.display='none';">
+                <div class="nasa-avatar-placeholder" id="nasa-avatar-display">👦</div>
+            </div>
+            <div class="nasa-logo">
+                <img src="img/logo.png" alt="krew+" style="cursor: pointer;" onclick="document.getElementById('new-agent-selection-screen').style.display='none';">
+            </div>
+        </div>
+        
+        <div class="nasa-content">
+            <h1 class="nasa-title-light">PRÊT ?</h1>
+            <h2 class="nasa-title-bold">CHOISISSAIT VOTRE AGENT</h2>
+            
+            <div class="nasa-cards-container">
+                <div class="nasa-card" onclick="selectNasaAgent('polyvalent')">
+                    <div class="nasa-card-top nasa-bg-yellow">
+                        <span class="nasa-emoji">👩🏻</span>
+                    </div>
+                    <div class="nasa-card-bottom">
+                        AGENT<br>POLYVALENT
+                    </div>
+                </div>
+                
+                <div class="nasa-card" onclick="selectNasaAgent('droit')">
+                    <div class="nasa-card-top nasa-bg-blue">
+                        <span class="nasa-emoji">👩🏻‍⚖️</span>
+                    </div>
+                    <div class="nasa-card-bottom">
+                        DROIT
+                    </div>
+                </div>
+                
+                <div class="nasa-card" onclick="selectNasaAgent('com')">
+                    <div class="nasa-card-top nasa-bg-pink">
+                        <span class="nasa-emoji">👔</span>
+                    </div>
+                    <div class="nasa-card-bottom">
+                        COMMERCIAL
+                    </div>
+                </div>
+                
+                <div class="nasa-card" onclick="selectNasaAgent('marketing')">
+                    <div class="nasa-card-top nasa-bg-green">
+                        <span class="nasa-emoji">🚀</span>
+                    </div>
+                    <div class="nasa-card-bottom">
+                        MARKETING
+                    </div>
+                </div>
+                
+                <div class="nasa-card nasa-add-card" onclick="document.getElementById('open-create-agent-btn-new').click(); document.getElementById('new-agent-selection-screen').style.display='none';">
+                    <div class="nasa-plus">+</div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

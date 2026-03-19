@@ -1767,3 +1767,77 @@ if (openCreateAgentBtn) {
         loadCustomAgents();
     });
 }
+
+// --- EXTRA POST-CONNECTION SELECTION SCREEN LOGIC ---
+function selectNasaAgent(type) {
+    const screen = document.getElementById('new-agent-selection-screen');
+    if (screen) screen.style.display = 'none';
+    
+    // Polyvalent clears agent so it's global
+    if (type === 'polyvalent') {
+        setAgent(null);
+        document.getElementById('user-input').focus();
+        return;
+    }
+    
+    // Select the corresponding card in the sidebar if exists
+    let sidebarCard = null;
+    const colorMap = {
+        'droit': '.bg-blue',
+        'com': '.bg-pink',
+        'marketing': '.bg-green'
+    };
+    const selector = colorMap[type];
+    if (selector) {
+        sidebarCard = document.querySelector(`.agent-card${selector}`);
+    }
+    
+    setAgent(type, sidebarCard);
+    document.getElementById('user-input').focus();
+}
+
+// Sync Avatar and Handle Screen Display Logic
+document.addEventListener('DOMContentLoaded', () => {
+    // If we're on a new login (no session), the screen is naturally visible.
+    // If the user already has an active session picked, we might want to hide it
+    // But per instructions "ajoute cette partie apres la connextion", it should always show 
+    // when arriving on app.html unless specifically clicking somewhere.
+    
+    // Piggyback auth state to sync avatar image
+    if (typeof auth !== 'undefined') {
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                try {
+                    const userDoc = await db.collection('users').doc(user.email).get();
+                    if (userDoc.exists && userDoc.data().avatar) {
+                        const nasaAvatar = document.getElementById('nasa-avatar-display');
+                        if (nasaAvatar) {
+                            nasaAvatar.innerHTML = `<img src="${userDoc.data().avatar}" alt="Avatar">`;
+                        }
+                    }
+                } catch(e) {
+                    console.log("Error loading avatar for nasa overlay", e);
+                }
+            }
+        });
+    }
+    
+    // Enhance startNewChat to also show our screen instead of the default "PRÊT" text
+    const oldNewChatBtn = document.getElementById('new-chat-btn');
+    if (oldNewChatBtn) {
+        oldNewChatBtn.addEventListener('click', () => {
+            const screen = document.getElementById('new-agent-selection-screen');
+            if (screen) screen.style.display = 'flex';
+        });
+    }
+    
+    // Enhance main logo click to also show our screen
+    const mainLogo = document.getElementById('main-krew-logo');
+    if (mainLogo) {
+        mainLogo.addEventListener('click', () => {
+            resetToHome();
+            const screen = document.getElementById('new-agent-selection-screen');
+            if (screen) screen.style.display = 'flex';
+        });
+    }
+});
