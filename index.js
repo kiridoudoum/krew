@@ -240,8 +240,30 @@ app.get('/api/notion/auth', (req, res) => {
   const { email } = req.query;
   if (!email) return res.status(400).send("Email requis pour associer le compte Notion.");
   
-  const authUrl = `https://api.notion.com/v1/oauth/authorize?client_id=${notionClientId}&response_type=code&owner=user&redirect_uri=${encodeURIComponent(appUrl + '/api/notion/callback')}&state=${encodeURIComponent(email)}`;
-  res.redirect(authUrl);
+  try {
+    const authUrl = `https://api.notion.com/v1/oauth/authorize?client_id=${notionClientId}&response_type=code&owner=user&redirect_uri=${encodeURIComponent(appUrl + '/api/notion/callback')}&state=${encodeURIComponent(email)}`;
+    res.redirect(authUrl);
+  } catch (err) {
+    res.status(500).send("Erreur d'authentification");
+  }
+});
+
+// STATUS NOTION
+app.get('/api/notion/status', async (req, res) => {
+  try {
+    const { email } = req.query;
+    if (!email) return res.json({ connected: false });
+
+    if (db) {
+      const userDoc = await db.collection('users').doc(email).get();
+      if (userDoc.exists && userDoc.data().notion_access_token) {
+        return res.json({ connected: true });
+      }
+    }
+    res.json({ connected: false });
+  } catch (err) {
+    res.json({ connected: false });
+  }
 });
 
 app.get('/api/notion/callback', async (req, res) => {

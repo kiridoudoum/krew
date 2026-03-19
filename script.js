@@ -980,8 +980,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 6. Clic sur CONNECTER NOTION (Profil)
     const btnConnectNotion = document.getElementById('connect-notion-btn');
+    
+    // NOUVEAU : Fonction pour vérifier le statut au chargement / ouverture du profil
+    async function updateNotionStatus() {
+        if (!btnConnectNotion) return;
+        const userEmail = localStorage.getItem('userEmail');
+        if (!userEmail) return;
+
+        try {
+            const apiRoot = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                            ? 'http://localhost:3000' : '';
+            const res = await fetch(`${apiRoot}/api/notion/status?email=${encodeURIComponent(userEmail)}`);
+            const data = await res.json();
+            if (data.connected) {
+                btnConnectNotion.innerText = "NOTION CONNECTÉ ✅";
+                btnConnectNotion.style.background = "#22c55e"; // Vert
+            } else {
+                btnConnectNotion.innerText = "CONNECTER NOTION";
+                btnConnectNotion.style.background = "#000000"; // Noir
+            }
+        } catch (e) {
+            console.error("Status check error:", e);
+        }
+    }
+
+    // Appeler au chargement
+    updateNotionStatus();
+
+    // Re-vérifier quand on ouvre la modale de profil
+    const profileAvatarBtn = document.getElementById('profile-avatar-btn');
+    if (profileAvatarBtn) {
+        profileAvatarBtn.addEventListener('click', updateNotionStatus);
+    }
+
     if (btnConnectNotion) {
         btnConnectNotion.addEventListener('click', () => {
+            if (btnConnectNotion.innerText.includes("✅")) {
+                if (confirm("Voulez-vous déconnecter Notion ?")) {
+                    // Pour simplifier ici, on relance juste l'auth ou on vide le tout
+                    // Mais le plus simple est de laisser reconnecter par dessus si besoin.
+                    // Pour l'instant on ne fait rien de spécial, ou on change juste le texte.
+                }
+                return;
+            }
             const userEmail = localStorage.getItem('userEmail');
             if (!userEmail) return alert("Veuillez vous reconnecter pour pouvoir lier Notion.");
             const apiRoot = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
