@@ -289,41 +289,42 @@ app.get('/api/notion/callback', async (req, res) => {
     res.status(500).send(`Erreur : ${err.message}`);
   }
 });
-
 app.post('/api/notion-create', async (req, res) => {
-  const { title, content, email } = req.body;
-  if (!email) return res.status(400).json({ error: "Email utilisateur manquant" });
-
-  let notion_token = null;
-
-  if (db) {
-    // RÉCUPÉRATION DEPUIS FIRESTORE
-    const userDoc = await db.collection('users').doc(email).get();
-    if (userDoc.exists) {
-        notion_token = userDoc.data().notion_access_token;
-        console.log("Token Notion trouvé dans Firestore pour:", email);
-    } else {
-        console.log("Aucun document trouvé dans Firestore pour:", email);
-    }
-  } else {
-    // Fallback local
-    let users = loadUsers();
-    const user = users.find(u => u.email === email);
-    if (user) notion_token = user.notion_access_token;
-  }
-
-  if (!notion_token) {
-    return res.status(401).json({ error: "Veuillez d'abord connecter votre compte Notion dans votre profil (ou verifiez que FIREBASE_SERVICE_ACCOUNT est configuré)." });
-  }
-
-  const userNotion = new Client({ auth: notion_token });
-
+  let targetDbId = null;
+  let targetPageId = null;
   try {
+    const { title, content, email } = req.body;
+    console.log("Notion-create request for:", email);
+    if (!email) return res.status(400).json({ error: "Email utilisateur manquant" });
+
+    let notion_token = null;
+
+    if (db) {
+      console.log("Accès Firestore pour récuperer le token...");
+      const userDoc = await db.collection('users').doc(email).get();
+      if (userDoc.exists) {
+          notion_token = userDoc.data().notion_access_token;
+          console.log("Token Notion trouvé dans Firestore.");
+      } else {
+          console.log("Aucun document Firestore pour cet email.");
+      }
+    } else {
+      console.log("Fallback local pour le token Notion (db is null).");
+      let users = loadUsers();
+      const user = users.find(u => u.email === email);
+      if (user) notion_token = user.notion_access_token;
+    }
+
+    if (!notion_token) {
+      console.log("Erreur: Pas de token Notion trouvé.");
+      return res.status(401).json({ error: "Veuillez d'abord connecter votre compte Notion dans votre profil (ou verifiez que FIREBASE_SERVICE_ACCOUNT est configuré)." });
+    }
+
+    const userNotion = new Client({ auth: notion_token });
     if (!content) return res.status(400).json({ error: "Contenu manquant" });
 
     // Step 1: Find a database or page
-    let targetDbId = null;
-    let targetPageId = null;
+    console.log("Recherche de parent Notion (Database/Page)...");
 
     const searchRes = await userNotion.search({
       filter: { property: 'object', value: 'database' },
