@@ -926,9 +926,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const data = await response.json();
                 if (data.success) {
+                    console.log("Notion Link Generated:", data.url);
                     btnYes.innerText = "VOIR SUR NOTION";
                     btnYes.style.background = "#000000";
                     btnYes.style.color = "#ffffff";
+                    btnYes.disabled = false; // RE-ACTIVER LE BOUTON POUR LE CLIC DU LIEN
                     
                     // On change le comportement au clic
                     btnYes.onclick = (e) => {
