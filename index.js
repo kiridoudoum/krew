@@ -324,29 +324,25 @@ app.post('/api/notion-create', async (req, res) => {
     if (!content) return res.status(400).json({ error: "Contenu manquant" });
 
     // Step 1: Find a database or page
-    console.log("Recherche de parent Notion (Database/Page)...");
-
+    // On recherche tout ce qui a été modifié récemment sans filtre restrictif
     const searchRes = await userNotion.search({
-      filter: { property: 'object', value: 'database' },
       sort: { direction: 'descending', timestamp: 'last_edited_time' },
-      page_size: 1
+      page_size: 20
     });
 
-    if (searchRes.results.length > 0) {
-      targetDbId = searchRes.results[0].id;
+    // On cherche d'abord la première base de données or page disponible
+    const foundDb = searchRes.results.find(r => r.object === 'database');
+    const foundPage = searchRes.results.find(r => r.object === 'page');
+
+    if (foundDb) {
+      targetDbId = foundDb.id;
+      console.log("Base de données Notion cible trouvée:", targetDbId);
+    } else if (foundPage) {
+      targetPageId = foundPage.id;
+      console.log("Page Notion cible trouvée:", targetPageId);
     } else {
-      const pageRes = await userNotion.search({
-        filter: { property: 'object', value: 'page' },
-        sort: { direction: 'descending', timestamp: 'last_edited_time' },
-        page_size: 1
-      });
-      if (pageRes.results.length > 0) {
-        targetPageId = pageRes.results[0].id;
-        console.log("Page Notion cible trouvée:", targetPageId);
-      } else {
-        console.log("Aucune page/DB partagée trouvée.");
-        return res.status(404).json({ error: "Aucune page ou base de données trouvée. Avez-vous partagé une page avec Krew+ sur Notion ?" });
-      }
+      console.log("Aucune page/DB partagée trouvée.");
+      return res.status(404).json({ error: "Aucune page ou base de données trouvée. Avez-vous partagé une page avec Krew+ sur Notion ?" });
     }
 
     const blocks = [];
