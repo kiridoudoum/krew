@@ -280,16 +280,9 @@ app.get('/api/notion/callback', async (req, res) => {
       console.log(`Token Notion sauvegardé pour ${email}`);
       res.redirect('/app.html?notion=success');
     } else {
-      // Fallback local (peu fiable sur Vercel)
-      let users = loadUsers();
-      let userIndex = users.findIndex(u => u.email === email);
-      if (userIndex !== -1) {
-        users[userIndex].notion_access_token = data.access_token;
-        saveUsers(users);
-        res.redirect('/app.html?notion=success');
-      } else {
-        res.status(404).send("Utilisateur non trouvé dans le système local.");
-      }
+      // Fallback local (peu fiable sur Vercel car le fichier /tmp/users.json est éphémère)
+      console.error("ERREUR CRITIQUE: Firebase Admin n'est pas initialisé sur Vercel.");
+      res.status(500).send("ERREUR SERVEUR: La variable d'environnement FIREBASE_SERVICE_ACCOUNT n'est pas détectée ou mal configurée sur Vercel. Veuillez vérifier vos variables d'environnement et faire un 'Redeploy'.");
     }
   } catch (err) {
     console.error("Notion OAuth Error:", err);
